@@ -296,7 +296,7 @@ export default function BadmintonMatchmaker() {
       </table>
 
       <button
-        className="mt-4 px-3 py-2 bg-orange-600 text-white rounded"
+        className="cursor-pointer mt-4 px-3 py-2 bg-orange-600 text-white rounded"
         onClick={runMatchmaking}
       >
         Générer les matchs
@@ -305,8 +305,10 @@ export default function BadmintonMatchmaker() {
       {/* AFFICHAGE MATCHS */}
       <div className="mt-6">
         <h3 className="font-bold mb-2">Matchs générés</h3>
+
+        {/* TERRAIN */}
         {matchResults.matches.map((m, i) => (
-          <div key={i} className={`p-3 border rounded space-y-2`}>
+          <div key={i} className={`p-3 width-fit border rounded space-y-2`}>
             <div className="flex justify-between">
               <div>
                 <div className="font-medium">Terrain {i + 1}</div>
