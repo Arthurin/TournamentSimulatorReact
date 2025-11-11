@@ -296,7 +296,7 @@ export default function BadmintonMatchmaker() {
       </table>
 
       <button
-        className="mt-4 px-3 py-2 bg-blue-600 text-white rounded"
+        className="mt-4 px-3 py-2 bg-orange-600 text-white rounded"
         onClick={runMatchmaking}
       >
         Générer les matchs
@@ -310,47 +310,57 @@ export default function BadmintonMatchmaker() {
             <div className="flex justify-between">
               <div>
                 <div className="font-medium">Terrain {i + 1}</div>
-                <div className="text-sm">
-                  {m.teamA.map((p) => p.name).join(" + ")}
-                  <span className="px-2">vs</span>
-                  {m.teamB.map((p) => p.name).join(" + ")}
-                </div>
-              </div>
-              <div className="text-sm text-gray-500">
-                (wins: {m.teamA[0].wins} vs {m.teamB[0].wins})
               </div>
             </div>
 
-            {/* ✅ Nouveaux boutons résultat */}
+            {/* ✅ matchs et boutons résultat */}
             <div className="flex gap-2">
               <button
                 onClick={() => recordMatchResult(m, "A")}
                 disabled={m.winner !== null}
-                className={`px-3 py-1 rounded ${
+                className={`px-3 py-1 hover:bg-green-600 rounded ${
                   m.winner === "A"
-                    ? "bg-blue-800 text-white"
+                    ? "bg-green-600 text-white"
                     : "bg-blue-600 text-white"
-                } ${m.winner !== null ? "opacity-60 cursor-not-allowed" : ""}`}
+                } ${
+                  m.winner !== null
+                    ? "opacity-60 cursor-not-allowed"
+                    : "cursor-pointer"
+                }`}
               >
-                Victoire équipe A
+                {m.teamA.map((p) => (
+                  <div key={p.id}>
+                    {p.name} (wins: {p.wins})
+                  </div>
+                ))}
+                Clique sur les gagnant·e·s
               </button>
-
+              <div className="px-2 self-center">VS</div>
               <button
                 onClick={() => recordMatchResult(m, "B")}
                 disabled={m.winner !== null}
-                className={`px-3 py-1 rounded ${
+                className={`px-3 py-1 hover:bg-green-600 rounded ${
                   m.winner === "B"
-                    ? "bg-red-800 text-white"
-                    : "bg-red-600 text-white"
-                } ${m.winner !== null ? "opacity-60 cursor-not-allowed" : ""}`}
+                    ? "bg-green-600 text-white"
+                    : "bg-pink-600 text-white"
+                } ${
+                  m.winner !== null
+                    ? "opacity-60 cursor-not-allowed"
+                    : "cursor-pointer"
+                }`}
               >
-                Victoire équipe B
+                {m.teamB.map((p) => (
+                  <div key={p.id}>
+                    {p.name} (wins: {p.wins})
+                  </div>
+                ))}
+                Clique sur les gagnant·e·s
               </button>
 
               {m.winner !== null && (
                 <button
                   onClick={() => undoMatchResult(m)}
-                  className="px-3 py-1 bg-gray-300 text-white rounded"
+                  className="px-3 py-1 bg-red-600 text-white rounded"
                 >
                   Annuler le résultat
                 </button>
