@@ -11,7 +11,7 @@ export default function BadmintonMatchmaker() {
   const [editName, setEditName] = useState("");
   const [editWins, setEditWins] = useState(0);
 
-  const [matchesResult, setMatchesResult] = useState({
+  const [matchResults, setMatchResults] = useState({
     matches: [],
     resting: [],
   });
@@ -88,7 +88,60 @@ export default function BadmintonMatchmaker() {
       }))
     );
 
-    setMatchesResult({ matches, resting });
+    setMatchResults({
+      matches: matches.map((m) => ({ ...m, winner: null })), // ajout
+      resting,
+    });
+  }
+
+  function recordMatchResult(match, winner) {
+    // winner = "A" ou "B"
+    const winningTeam = winner === "A" ? match.teamA : match.teamB;
+    const losingTeam = winner === "A" ? match.teamB : match.teamA;
+
+    // Mise à jour dans une nouvelle copie des players
+    setPlayers((prev) =>
+      prev.map((p) => {
+        const isWinner = winningTeam.some((w) => w.id === p.id);
+        if (isWinner) {
+          return { ...p, wins: (p.wins || 0) + 1 };
+        }
+        return p;
+      })
+    );
+
+    // Mise à jour des partenaires/adversaires
+    setPlayers((prev) => {
+      const updated = new Map(
+        prev.map((p) => [
+          p.id,
+          {
+            ...p,
+            pastPartners: new Set(p.pastPartners),
+            pastOpponents: new Set(p.pastOpponents),
+          },
+        ])
+      );
+
+      const addHistory = (playerA, playerB, opponent1, opponent2) => {
+        updated.get(playerA.id).pastPartners.add(playerB.id);
+        updated.get(playerB.id).pastPartners.add(playerA.id);
+        updated.get(playerA.id).pastOpponents.add(opponent1.id);
+        updated.get(playerA.id).pastOpponents.add(opponent2.id);
+      };
+
+      // Partners + Opponents
+      addHistory(winningTeam[0], winningTeam[1], losingTeam[0], losingTeam[1]);
+      addHistory(losingTeam[0], losingTeam[1], winningTeam[0], winningTeam[1]);
+
+      return Array.from(updated.values());
+    });
+
+    // ✅ Empêche nouveau clic
+    setMatchResults((prev) => ({
+      ...prev,
+      matches: prev.matches.map((m) => (m === match ? { ...m, winner } : m)),
+    }));
   }
 
   return (
@@ -189,16 +242,53 @@ export default function BadmintonMatchmaker() {
       {/* AFFICHAGE MATCHS */}
       <div className="mt-6">
         <h3 className="font-bold mb-2">Matchs générés</h3>
-        {matchesResult.matches.map((m, i) => (
-          <div key={i} className="p-2 border rounded mb-2">
-            <strong>Terrain {i + 1}</strong> :
-            {m.teamA.map((p) => p.name).join(" + ")} vs{" "}
-            {m.teamB.map((p) => p.name).join(" + ")}
+        {matchResults.matches.map((m, i) => (
+          <div key={i} className={`p-3 border rounded space-y-2`}>
+            <div className="flex justify-between">
+              <div>
+                <div className="font-medium">Terrain {i + 1}</div>
+                <div className="text-sm">
+                  {m.teamA.map((p) => p.name).join(" + ")}
+                  <span className="px-2">vs</span>
+                  {m.teamB.map((p) => p.name).join(" + ")}
+                </div>
+              </div>
+              <div className="text-sm text-gray-500">
+                (wins: {m.teamA[0].wins} vs {m.teamB[0].wins})
+              </div>
+            </div>
+
+            {/* ✅ Nouveaux boutons résultat */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => recordMatchResult(m, "A")}
+                disabled={m.winner !== null}
+                className={`px-3 py-1 rounded ${
+                  m.winner === "A"
+                    ? "bg-blue-800 text-white"
+                    : "bg-blue-600 text-white"
+                } ${m.winner !== null ? "opacity-60 cursor-not-allowed" : ""}`}
+              >
+                Victoire équipe A
+              </button>
+
+              <button
+                onClick={() => recordMatchResult(m, "B")}
+                disabled={m.winner !== null}
+                className={`px-3 py-1 rounded ${
+                  m.winner === "B"
+                    ? "bg-red-800 text-white"
+                    : "bg-red-600 text-white"
+                } ${m.winner !== null ? "opacity-60 cursor-not-allowed" : ""}`}
+              >
+                Victoire équipe B
+              </button>
+            </div>
           </div>
         ))}
 
         <h4 className="mt-4 font-medium">Au repos :</h4>
-        {matchesResult.resting.map((p) => (
+        {matchResults.resting.map((p) => (
           <span
             key={p.id}
             className="inline-block px-2 py-1 border rounded mr-2"
