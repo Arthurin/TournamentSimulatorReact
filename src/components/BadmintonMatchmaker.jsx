@@ -24,8 +24,8 @@ export default function BadmintonMatchmaker() {
         id: crypto.randomUUID(),
         name: newName.trim(),
         wins: 0,
-        partners: [],
-        opponents: [],
+        pastPartners: new Set(),
+        pastOpponents: new Set(),
         lastRest: false,
       },
     ]);
@@ -231,6 +231,7 @@ export default function BadmintonMatchmaker() {
             <th className="border px-2 py-1">Prénom</th>
             <th className="border px-2 py-1">Victoires</th>
             <th className="border px-2 py-1">Nb Repos</th>
+            <th className="border px-2 py-1">Partenaires</th>
             {admin && <th className="border px-2 py-1">Actions</th>}
           </tr>
         </thead>
@@ -261,6 +262,10 @@ export default function BadmintonMatchmaker() {
 
               <td className="border px-2 py-1 text-center">
                 {player.restCount || 0}
+              </td>
+
+              <td className="border px-2 py-1 text-center">
+                {player.pastPartners}
               </td>
 
               {admin && (

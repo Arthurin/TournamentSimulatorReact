@@ -70,8 +70,8 @@ export function generateMatches(players, nbCourts = 7) {
    */
   function matchCost(a, b) {
     let cost = 0;
-    if (a.partners.includes(b.id)) cost += 10; // Ils ont déjà joué ensemble
-    if (a.opponents.includes(b.id)) cost += 5; // Ils se sont déjà affrontés
+    if (a.pastPartners.has(b.id)) cost += 10; // Ils ont déjà joué ensemble
+    if (a.pastOpponents.has(b.id)) cost += 5; // Ils se sont déjà affrontés
     console.log(`Compatibilité entre ${a.name} et ${b.name} : ${cost}`);
 
     return cost;
