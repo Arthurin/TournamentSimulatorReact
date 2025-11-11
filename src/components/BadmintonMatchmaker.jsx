@@ -52,8 +52,43 @@ export default function BadmintonMatchmaker() {
   }
 
   function runMatchmaking() {
-    const result = generateMatches(players, 7);
-    setMatchesResult(result);
+    const { matches, resting } = generateMatches(players, 7);
+
+    // ✅ AJOUT DEBUG : affichage clair des joueurs retenus
+    console.log("=== Sélection du round ===");
+    console.log(
+      "Joueurs qui jouent :",
+      players
+        .filter((p) => !resting.some((r) => r.id === p.id))
+        .map((p) => p.name)
+    );
+    console.log(
+      "Joueurs qui se reposent :",
+      resting.map((p) => p.name)
+    );
+    console.log(
+      "Nombre total :",
+      players.length,
+      "| jouent :",
+      players.length - resting.length,
+      "| repos :",
+      resting.length
+    );
+    console.log("=========================");
+
+    // update players' rest counts and restedLastRound flag
+    const restingIds = new Set(resting.map((p) => p.id));
+    setPlayers((prev) =>
+      prev.map((p) => ({
+        ...p,
+        restedLastRound: restingIds.has(p.id),
+        restCount: restingIds.has(p.id)
+          ? (p.restCount || 0) + 1
+          : p.restCount || 0,
+      }))
+    );
+
+    setMatchesResult({ matches, resting });
   }
 
   return (
@@ -79,6 +114,7 @@ export default function BadmintonMatchmaker() {
           <tr>
             <th className="border px-2 py-1">Prénom</th>
             <th className="border px-2 py-1">Victoires</th>
+            <th className="border px-2 py-1">Nb Repos</th>
             {admin && <th className="border px-2 py-1">Actions</th>}
           </tr>
         </thead>
@@ -106,6 +142,11 @@ export default function BadmintonMatchmaker() {
                   player.wins
                 )}
               </td>
+
+              <td className="border px-2 py-1 text-center">
+                {player.restCount || 0}
+              </td>
+
               {admin && (
                 <td className="border px-2 py-1 text-center">
                   {editingPlayerId === player.id ? (
