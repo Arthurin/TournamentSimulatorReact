@@ -144,6 +144,69 @@ export default function BadmintonMatchmaker() {
     }));
   }
 
+  function undoMatchResult(match) {
+    const { winner, teamA, teamB } = match;
+    if (!winner) return; // rien à annuler
+
+    const winningTeam = winner === "A" ? teamA : teamB;
+    const losingTeam = winner === "A" ? teamB : teamA;
+
+    // 1) Retirer les victoires ajoutées
+    setPlayers((prev) =>
+      prev.map((p) => {
+        const isWinner = winningTeam.some((w) => w.id === p.id);
+        if (isWinner) {
+          return { ...p, wins: Math.max(0, (p.wins || 0) - 1) };
+        }
+        return p;
+      })
+    );
+
+    // 2) Retirer l'historique partenaires / adversaires
+    setPlayers((prev) => {
+      const updated = new Map(
+        prev.map((p) => [
+          p.id,
+          {
+            ...p,
+            pastPartners: new Set(p.pastPartners),
+            pastOpponents: new Set(p.pastOpponents),
+          },
+        ])
+      );
+
+      const removeHistory = (playerA, playerB, opponent1, opponent2) => {
+        updated.get(playerA.id).pastPartners.delete(playerB.id);
+        updated.get(playerB.id).pastPartners.delete(playerA.id);
+        updated.get(playerA.id).pastOpponents.delete(opponent1.id);
+        updated.get(playerA.id).pastOpponents.delete(opponent2.id);
+      };
+
+      removeHistory(
+        winningTeam[0],
+        winningTeam[1],
+        losingTeam[0],
+        losingTeam[1]
+      );
+      removeHistory(
+        losingTeam[0],
+        losingTeam[1],
+        winningTeam[0],
+        winningTeam[1]
+      );
+
+      return Array.from(updated.values());
+    });
+
+    // 3) Remettre `winner` à null → les boutons redeviennent cliquables
+    setMatchResults((prev) => ({
+      ...prev,
+      matches: prev.matches.map((m) =>
+        m === match ? { ...m, winner: null } : m
+      ),
+    }));
+  }
+
   return (
     <div className="p-4">
       {/* BOUTON SECRET POUR ADMIN */}
@@ -283,6 +346,15 @@ export default function BadmintonMatchmaker() {
               >
                 Victoire équipe B
               </button>
+
+              {m.winner !== null && (
+                <button
+                  onClick={() => undoMatchResult(m)}
+                  className="px-3 py-1 bg-gray-300 text-white rounded"
+                >
+                  Annuler le résultat
+                </button>
+              )}
             </div>
           </div>
         ))}
