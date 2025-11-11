@@ -211,7 +211,7 @@ export default function BadmintonMatchmaker() {
     <div className="p-4">
       {/* BOUTON SECRET POUR ADMIN */}
       <button
-        className="absolute top-0 right-0 w-6 h-6 bg-white"
+        className="absolute top-0 right-0 w-10 h-10 bg-white cursor-pointer"
         onClick={() => setAdmin((a) => !a)}
       />
 
