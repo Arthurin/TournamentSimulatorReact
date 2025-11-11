@@ -308,7 +308,7 @@ export default function BadmintonMatchmaker() {
 
         {/* TERRAIN */}
         {matchResults.matches.map((m, i) => (
-          <div key={i} className={`p-3 width-fit border rounded space-y-2`}>
+          <div key={i} className={`p-3 w-fit border rounded space-y-2`}>
             <div className="flex justify-between">
               <div>
                 <div className="font-medium">Terrain {i + 1}</div>
