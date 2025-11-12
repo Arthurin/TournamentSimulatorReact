@@ -142,6 +142,7 @@ export default function BadmintonMatchmaker() {
 
   function undoMatchResult(match) {
     const { winner, teamA, teamB } = match;
+    console.log("Undo match result for match:", match);
     if (!winner) return;
 
     const winningTeam = winner === "A" ? teamA : teamB;
@@ -388,14 +389,19 @@ export default function BadmintonMatchmaker() {
               {matchmakingValidated ? (
                 /*Affichage du bouton pour saisir les gagnants*/
                 <button
-                  onClick={() => recordMatchResult(m, "A")}
-                  disabled={m.winner !== null}
-                  className={`px-3 py-1 hover:bg-green-600 rounded ${
+                  onClick={() => {
+                    if (m.winner === "A") {
+                      undoMatchResult(m); // annule si on reclique sur le gagnant
+                    } else if (!m.winner) {
+                      recordMatchResult(m, "A"); // enregistre si pas encore de gagnant
+                    }
+                  }}
+                  className={`px-3 py-1 rounded ${
                     m.winner === "A"
-                      ? "bg-green-600 text-white"
-                      : "bg-blue-600 text-white"
+                      ? "bg-green-500 text-white"
+                      : "bg-blue-600 text-white hover:bg-green-500"
                   } ${
-                    m.winner !== null
+                    m.winner && m.winner !== "A"
                       ? "opacity-60 cursor-not-allowed"
                       : "cursor-pointer"
                   }`}
@@ -405,7 +411,11 @@ export default function BadmintonMatchmaker() {
                       {p.name} (wins: {p.wins})
                     </div>
                   ))}
-                  {matchmakingValidated && "Clique sur les gagnant·e·s"}
+                  {m.winner === null
+                    ? "Clique sur les gagnant·e·s"
+                    : m.winner === "A"
+                    ? "Victoire"
+                    : " Défaite"}
                 </button>
               ) : (
                 /*Affichage du texte, on met les boutons que si c'est validé*/
@@ -418,7 +428,6 @@ export default function BadmintonMatchmaker() {
                       {p.name} (wins: {p.wins})
                     </div>
                   ))}
-                  {matchmakingValidated && "Clique sur les gagnant·e·s"}
                 </button>
               )}
 
@@ -428,14 +437,19 @@ export default function BadmintonMatchmaker() {
               {matchmakingValidated ? (
                 /*Affichage du bouton pour saisir les gagnants*/
                 <button
-                  onClick={() => recordMatchResult(m, "A")}
-                  disabled={m.winner !== null}
-                  className={`px-3 py-1 hover:bg-green-600 rounded ${
+                  onClick={() => {
+                    if (m.winner === "B") {
+                      undoMatchResult(m); // annule si on reclique sur le gagnant
+                    } else if (!m.winner) {
+                      recordMatchResult(m, "B"); // enregistre si pas encore de gagnant
+                    }
+                  }}
+                  className={`px-3 py-1 rounded ${
                     m.winner === "B"
-                      ? "bg-green-600 text-white"
-                      : "bg-pink-600 text-white"
+                      ? "bg-green-500 text-white"
+                      : "bg-pink-600 text-white hover:bg-green-500"
                   } ${
-                    m.winner !== null
+                    m.winner && m.winner !== "B"
                       ? "opacity-60 cursor-not-allowed"
                       : "cursor-pointer"
                   }`}
@@ -445,7 +459,11 @@ export default function BadmintonMatchmaker() {
                       {p.name} (wins: {p.wins})
                     </div>
                   ))}
-                  {matchmakingValidated && "Clique sur les gagnant·e·s"}
+                  {m.winner === null
+                    ? "Clique sur les gagnant·e·s"
+                    : m.winner === "B"
+                    ? "Victoire"
+                    : " Défaite"}
                 </button>
               ) : (
                 /*Affichage du texte, on met les boutons que si c'est validé*/
@@ -458,16 +476,6 @@ export default function BadmintonMatchmaker() {
                       {p.name} (wins: {p.wins})
                     </div>
                   ))}
-                  {matchmakingValidated && "Clique sur les gagnant·e·s"}
-                </button>
-              )}
-
-              {m.winner !== null && (
-                <button
-                  onClick={() => undoMatchResult(m)}
-                  className="px-3 py-1 bg-red-600 text-white rounded"
-                >
-                  Annuler le résultat
                 </button>
               )}
             </div>

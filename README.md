@@ -17,7 +17,4 @@ If you are developing a production application, we recommend using TypeScript wi
 
 ##
 
-La gestion du repos laisse à désirer : un joueur peut être 2 fois au repos et d'autres 0 fois.
-TODO: faire un bouton de confirmation lorsqu'on génère les matchs pour éviter le misclick. Ce bouton disparait une fois les matchs générés.
-"Etes vous sûr.e ? Il y a eu 0/5 matchs de complété"
-Il y a un problème : quand je clique sur générer les matchs cela augmente tout de suite le nombre de repos pour les joueurs au repos, alors que les matchs n'ont pas été joué et donc si je reclique tout de suite sur générer les matchs ça va encore incrémenter le compteur de repos et ainsi de suite. Solution : après avoir cliqué sur "générer de nouvelles équipes" un bouton devient actif : "Valider le matchmaking et commencer les matchs". Lorsqu'on clique sur ce bouton on incrémente le compteur de repos pour les joueurs au repos, et on va aussi désactiver le bouton "générer de nouvelles équipes" tant que tous les matchs précédents n'ont pas été résolus (en cliquant sur l'équipe gagnante).
+La gestion du repos est à vérifier : est-ce pris en compte pour générer les matchs ?
