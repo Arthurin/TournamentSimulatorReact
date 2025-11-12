@@ -11,6 +11,10 @@ export default function BadmintonMatchmaker() {
   const [players, setPlayers] = useState(createInitialPlayers);
   const [newName, setNewName] = useState("");
 
+  const [roundCount, setRoundCount] = useState(1);
+  const [matchmakingGenerated, setMatchmakingGenerated] = useState(false);
+  const [matchmakingValidated, setMatchmakingValidated] = useState(false);
+
   const [admin, setAdmin] = useState(false);
   const [editingPlayerId, setEditingPlayerId] = useState(null);
   const [editName, setEditName] = useState("");
@@ -74,40 +78,6 @@ export default function BadmintonMatchmaker() {
 
   function runMatchmaking() {
     const { matches, resting } = generateMatches(players, 7);
-
-    // ✅ AJOUT DEBUG : affichage clair des joueurs retenus
-    console.log("=== Sélection du round ===");
-    console.log(
-      "Joueurs qui jouent :",
-      players
-        .filter((p) => !resting.some((r) => r.id === p.id))
-        .map((p) => p.name)
-    );
-    console.log(
-      "Joueurs qui se reposent :",
-      resting.map((p) => p.name)
-    );
-    console.log(
-      "Nombre total :",
-      players.length,
-      "| jouent :",
-      players.length - resting.length,
-      "| repos :",
-      resting.length
-    );
-    console.log("=========================");
-
-    // update players' rest counts and restedLastRound flag
-    const restingIds = new Set(resting.map((p) => p.id));
-    setPlayers((prev) =>
-      prev.map((p) => ({
-        ...p,
-        restedLastRound: restingIds.has(p.id),
-        restCount: restingIds.has(p.id)
-          ? (p.restCount || 0) + 1
-          : p.restCount || 0,
-      }))
-    );
 
     setMatchResults({
       matches: matches.map((m) => ({ ...m, winner: null })), // ajout
@@ -287,7 +257,11 @@ export default function BadmintonMatchmaker() {
 
               <td className="border px-2 py-1 text-center">
                 {[...player.pastPartners]
-                  .map((partnerId) => getName(players, partnerId))
+                  .map((partnerId) => {
+                    const name = getName(players, partnerId);
+                    const count = player.partnersHistory?.[partnerId] || 1; // par défaut 1
+                    return count > 1 ? `${name} (x${count})` : name;
+                  })
                   .join(" ; ")}
               </td>
 
@@ -323,12 +297,77 @@ export default function BadmintonMatchmaker() {
         </tbody>
       </table>
 
+      <h2 className="text-xl font-bold mt-6 mb-3">Round {roundCount}</h2>
+
       <button
-        className="cursor-pointer mt-4 px-3 py-2 bg-orange-600 text-white rounded"
-        onClick={runMatchmaking}
+        className={`mt-4 px-3 py-2 bg-orange-600 text-white rounded ${
+          matchmakingValidated
+            ? "opacity-60 cursor-not-allowed"
+            : "opacity-100 cursor-pointer"
+        }`}
+        onClick={() => {
+          runMatchmaking();
+          setMatchmakingGenerated(true);
+          setMatchmakingValidated(false); // reset validation si on regénère
+        }}
+        disabled={matchmakingValidated}
       >
         Générer les matchs
       </button>
+
+      {matchmakingGenerated && (
+        <>
+          {matchResults.matches.every((m) => m.winner !== null) ? (
+            // Bouton Round Terminé //
+            // Tous les matchs ont été joués → bouton "Round terminé"
+            <button
+              className="cursor-pointer mt-2 px-3 py-2 bg-purple-600 text-white rounded opacity-100"
+              onClick={() => {
+                // Incrémenter le compteur de round
+                setRoundCount((r) => r + 1);
+                // Générer de nouvelles équipes
+                runMatchmaking();
+                setMatchmakingGenerated(true);
+                setMatchmakingValidated(false);
+              }}
+            >
+              Round terminé, passer au round suivant
+            </button>
+          ) : (
+            // Bouton Validation du matchmaking //
+            // Il est désactivé si le matchmaking validé
+            <button
+              className={`mt-2 px-3 py-2 bg-green-600 rounded ${
+                matchmakingValidated
+                  ? "opacity-60 text-white cursor-not-allowed"
+                  : "opacity-100 text-white cursor-pointer"
+              }`}
+              disabled={matchmakingValidated}
+              onClick={() => {
+                // ✅ Incrémenter le compteur de repos pour les joueurs au repos
+                const restingIds = new Set(
+                  matchResults.resting.map((p) => p.id)
+                );
+                setPlayers((prev) =>
+                  prev.map((p) => ({
+                    ...p,
+                    restedLastRound: restingIds.has(p.id),
+                    restCount: restingIds.has(p.id)
+                      ? (p.restCount || 0) + 1
+                      : p.restCount || 0,
+                  }))
+                );
+
+                setMatchmakingValidated(true);
+              }}
+            >
+              {matchmakingValidated
+                ? "C'est parti, les matchs ont commencés !"
+                : "Confirmer le matchmaking et commencer les matchs"}
+            </button>
+          )}
+        </>
+      )}
 
       {/* AFFICHAGE MATCHS */}
       <div className="mt-6">
@@ -345,47 +384,83 @@ export default function BadmintonMatchmaker() {
 
             {/* ✅ matchs et boutons résultat */}
             <div className="flex gap-2">
-              <button
-                onClick={() => recordMatchResult(m, "A")}
-                disabled={m.winner !== null}
-                className={`px-3 py-1 hover:bg-green-600 rounded ${
-                  m.winner === "A"
-                    ? "bg-green-600 text-white"
-                    : "bg-blue-600 text-white"
-                } ${
-                  m.winner !== null
-                    ? "opacity-60 cursor-not-allowed"
-                    : "cursor-pointer"
-                }`}
-              >
-                {m.teamA.map((p) => (
-                  <div key={p.id}>
-                    {p.name} (wins: {p.wins})
-                  </div>
-                ))}
-                Clique sur les gagnant·e·s
-              </button>
+              {/* EQUIPE A */}
+              {matchmakingValidated ? (
+                /*Affichage du bouton pour saisir les gagnants*/
+                <button
+                  onClick={() => recordMatchResult(m, "A")}
+                  disabled={m.winner !== null}
+                  className={`px-3 py-1 hover:bg-green-600 rounded ${
+                    m.winner === "A"
+                      ? "bg-green-600 text-white"
+                      : "bg-blue-600 text-white"
+                  } ${
+                    m.winner !== null
+                      ? "opacity-60 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }`}
+                >
+                  {m.teamA.map((p) => (
+                    <div key={p.id}>
+                      {p.name} (wins: {p.wins})
+                    </div>
+                  ))}
+                  {matchmakingValidated && "Clique sur les gagnant·e·s"}
+                </button>
+              ) : (
+                /*Affichage du texte, on met les boutons que si c'est validé*/
+                <button
+                  disabled
+                  className="px-3 py-1 bg-blue-600 text-white rounded"
+                >
+                  {m.teamA.map((p) => (
+                    <div key={p.id}>
+                      {p.name} (wins: {p.wins})
+                    </div>
+                  ))}
+                  {matchmakingValidated && "Clique sur les gagnant·e·s"}
+                </button>
+              )}
+
               <div className="px-2 self-center">VS</div>
-              <button
-                onClick={() => recordMatchResult(m, "B")}
-                disabled={m.winner !== null}
-                className={`px-3 py-1 hover:bg-green-600 rounded ${
-                  m.winner === "B"
-                    ? "bg-green-600 text-white"
-                    : "bg-pink-600 text-white"
-                } ${
-                  m.winner !== null
-                    ? "opacity-60 cursor-not-allowed"
-                    : "cursor-pointer"
-                }`}
-              >
-                {m.teamB.map((p) => (
-                  <div key={p.id}>
-                    {p.name} (wins: {p.wins})
-                  </div>
-                ))}
-                Clique sur les gagnant·e·s
-              </button>
+
+              {/* EQUIPE B */}
+              {matchmakingValidated ? (
+                /*Affichage du bouton pour saisir les gagnants*/
+                <button
+                  onClick={() => recordMatchResult(m, "A")}
+                  disabled={m.winner !== null}
+                  className={`px-3 py-1 hover:bg-green-600 rounded ${
+                    m.winner === "B"
+                      ? "bg-green-600 text-white"
+                      : "bg-pink-600 text-white"
+                  } ${
+                    m.winner !== null
+                      ? "opacity-60 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }`}
+                >
+                  {m.teamB.map((p) => (
+                    <div key={p.id}>
+                      {p.name} (wins: {p.wins})
+                    </div>
+                  ))}
+                  {matchmakingValidated && "Clique sur les gagnant·e·s"}
+                </button>
+              ) : (
+                /*Affichage du texte, on met les boutons que si c'est validé*/
+                <button
+                  disabled
+                  className="px-3 py-1 bg-pink-600 text-white rounded"
+                >
+                  {m.teamB.map((p) => (
+                    <div key={p.id}>
+                      {p.name} (wins: {p.wins})
+                    </div>
+                  ))}
+                  {matchmakingValidated && "Clique sur les gagnant·e·s"}
+                </button>
+              )}
 
               {m.winner !== null && (
                 <button
