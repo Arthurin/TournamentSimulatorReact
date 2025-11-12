@@ -20,3 +20,15 @@ If you are developing a production application, we recommend using TypeScript wi
 La gestion du repos laisse à désirer : un joueur peut être 2 fois au repos et d'autres 0 fois.
 TODO: faire un bouton de confirmation lorsqu'on génère les matchs pour éviter le misclick. Ce bouton disparait une fois les matchs générés.
 "Etes vous sûr.e ? Il y a eu 0/5 matchs de complété"
+
+FAIL src/tests/matchmaking.test.js > generateMatches() > évite de rejouer avec le même partenaire
+AssertionError: expected [ 'j1', 'j2' ] to be undefined
+
+- Expected:
+  undefined
+
+* Received:
+  [
+  "j1",
+  "j2",
+  ]

@@ -64,65 +64,64 @@ export function generateMatches(players, nbCourts = 7) {
 
   const matches = [];
 
-  // coût pair à pair : plus haut = moins désirable
   function matchCost(a, b) {
     let cost = 0;
-    if (a.pastPartners?.has(b.id) || b.pastPartners?.has(a.id)) cost += 1000; // déjà partenaires : grosse pénalité
-    if (a.pastOpponents?.has(b.id) || b.pastOpponents?.has(a.id)) cost += 50; // déjà adversaires : pénalité moindre
-    // plus on a d'historique de partenaires, plus on a tendance à éviter (soft)
-    cost += (a.pastPartners?.size ?? 0) + (b.pastPartners?.size ?? 0);
+    // déjà partenaires → grosse pénalité
+    if (a.pastPartners?.has(b.id) || b.pastPartners?.has(a.id)) cost += 1000;
+    // déjà adversaires → petite pénalité
+    if (a.pastOpponents?.has(b.id) || b.pastOpponents?.has(a.id)) cost += 50;
+    // plus on a de partenaires différents, mieux c’est (on soustrait légèrement)
+    cost -= (a.pastPartners?.size ?? 0) + (b.pastPartners?.size ?? 0);
     console.log(`Compatibilité entre ${a.name} et ${b.name} : ${cost}`);
     return cost;
   }
 
-  /**
-   * Construction des matchs par groupes (buckets de même wins)
-   */
   for (let i = 0; i < activeCandidates.length; i += 4) {
     const group = activeCandidates.slice(i, i + 4);
     if (group.length < 4) break;
 
-    // 1) Trier les joueurs par nombre de partenaires déjà rencontrés
     group.sort((a, b) => a.pastPartners.size - b.pastPartners.size);
 
     const used = new Set();
     const pairs = [];
 
-    // 2) Former les paires une par une
     for (let p = 0; p < group.length; p++) {
       const player = group[p];
       if (used.has(player.id)) continue;
 
       let bestPartner = null;
-      let bestScore = -Infinity; // car matchCost retourne négatif si "mauvais"
+      let bestScore = Infinity; // on cherche le coût minimal
 
       for (let q = p + 1; q < group.length; q++) {
         const other = group[q];
         if (used.has(other.id)) continue;
 
-        // Priorité à un partenaire jamais joué ensemble
-        if (!player.pastPartners.has(other.id)) {
-          bestPartner = other;
-          break;
-        }
-
-        // Sinon on choisit celui avec le coût le moins mauvais
         const cost = matchCost(player, other);
-        if (cost > bestScore) {
-          bestScore = cost;
+
+        // priorité à un partenaire jamais rencontré
+        const neverPlayedTogether =
+          !player.pastPartners.has(other.id) &&
+          !other.pastPartners.has(player.id);
+
+        // on garde le partenaire si :
+        // - jamais joué ensemble (prioritaire)
+        // - ou bien si le coût est plus faible
+        if (neverPlayedTogether && cost < bestScore) {
           bestPartner = other;
+          bestScore = cost;
+        } else if (!bestPartner || cost < bestScore) {
+          bestPartner = other;
+          bestScore = cost;
         }
       }
 
-      // On marque les deux joueurs comme utilisés
-      if (bestPartner) {
+      if (bestPartner !== null) {
         used.add(player.id);
         used.add(bestPartner.id);
         pairs.push([player, bestPartner]);
       }
     }
 
-    // Si on n’a pas deux paires complètes → passer ce groupe
     if (pairs.length < 2) continue;
 
     const teamA = pairs[0];
