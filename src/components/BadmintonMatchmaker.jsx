@@ -2,6 +2,11 @@
 import { useState, useEffect } from "react";
 import { generateMatches } from "../utils/matchmaking";
 
+function getName(players, id) {
+  const p = players.find((player) => player.id === id);
+  return p ? p.name : "?";
+}
+
 export default function BadmintonMatchmaker() {
   const [players, setPlayers] = useState(createInitialPlayers);
   const [newName, setNewName] = useState("");
@@ -145,6 +150,8 @@ export default function BadmintonMatchmaker() {
         updated.get(playerB.id).pastPartners.add(playerA.id);
         updated.get(playerA.id).pastOpponents.add(opponent1.id);
         updated.get(playerA.id).pastOpponents.add(opponent2.id);
+        updated.get(playerB.id).pastOpponents.add(opponent1.id);
+        updated.get(playerB.id).pastOpponents.add(opponent2.id);
       };
 
       // Partners + Opponents
@@ -197,6 +204,8 @@ export default function BadmintonMatchmaker() {
         updated.get(playerB.id).pastPartners.delete(playerA.id);
         updated.get(playerA.id).pastOpponents.delete(opponent1.id);
         updated.get(playerA.id).pastOpponents.delete(opponent2.id);
+        updated.get(playerB.id).pastOpponents.delete(opponent1.id);
+        updated.get(playerB.id).pastOpponents.delete(opponent2.id);
       };
 
       removeHistory(
@@ -249,6 +258,7 @@ export default function BadmintonMatchmaker() {
             <th className="border px-2 py-1">Victoires</th>
             <th className="border px-2 py-1">Nb Repos</th>
             <th className="border px-2 py-1">Partenaires précédents</th>
+            <th className="border px-2 py-1">Adversaires précédents</th>
             {admin && <th className="border px-2 py-1">Actions</th>}
           </tr>
         </thead>
@@ -282,11 +292,15 @@ export default function BadmintonMatchmaker() {
               </td>
 
               <td className="border px-2 py-1 text-center">
-                {[...player.pastPartners].map((partnerId) => (
-                  <span key={partnerId} className="mr-1">
-                    {players.find((p) => p.id === partnerId)?.name ?? "?"}
-                  </span>
-                ))}
+                {[...player.pastPartners]
+                  .map((partnerId) => getName(players, partnerId))
+                  .join(" ; ")}
+              </td>
+
+              <td className="border px-2 py-1 text-center">
+                {[...player.pastOpponents]
+                  .map((oppId) => getName(players, oppId))
+                  .join(" ; ")}
               </td>
 
               {admin && (
