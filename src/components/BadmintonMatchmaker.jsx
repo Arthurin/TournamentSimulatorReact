@@ -217,6 +217,24 @@ export default function BadmintonMatchmaker() {
         onKeyDown={(e) => e.key === "Enter" && addPlayer()}
       />
 
+      <button
+        className={`mt-4 px-3 py-2 bg-orange-600 text-white rounded ${
+          matchmakingValidated
+            ? "opacity-60 cursor-not-allowed"
+            : "opacity-100 cursor-pointer"
+        }`}
+        onClick={() => {
+          runMatchmaking();
+          setMatchmakingGenerated(true);
+          setMatchmakingValidated(false); // reset validation si on regénère
+        }}
+        disabled={matchmakingValidated}
+      >
+        {matchResults.matches.length !== 0
+          ? "Regénérer les matchs (en cas d'ajout de joueur·euse·s)"
+          : "Générer les matchs"}
+      </button>
+
       <table className="mt-3 table-auto border-collapse border w-full">
         <thead>
           <tr>
@@ -300,22 +318,6 @@ export default function BadmintonMatchmaker() {
 
       <h2 className="text-xl font-bold mt-6 mb-3">Round {roundCount}</h2>
 
-      <button
-        className={`mt-4 px-3 py-2 bg-orange-600 text-white rounded ${
-          matchmakingValidated
-            ? "opacity-60 cursor-not-allowed"
-            : "opacity-100 cursor-pointer"
-        }`}
-        onClick={() => {
-          runMatchmaking();
-          setMatchmakingGenerated(true);
-          setMatchmakingValidated(false); // reset validation si on regénère
-        }}
-        disabled={matchmakingValidated}
-      >
-        Générer les matchs
-      </button>
-
       {matchmakingGenerated && (
         <>
           {matchResults.matches.every((m) => m.winner !== null) ? (
@@ -372,11 +374,21 @@ export default function BadmintonMatchmaker() {
 
       {/* AFFICHAGE MATCHS */}
       <div className="mt-6">
-        <h3 className="font-bold mb-2">Matchs générés</h3>
+        <h4 className="mt-3 font-bold mb-2">
+          Au repos :
+          {matchResults.resting.map((p) => (
+            <span
+              key={p.id}
+              className="inline-block font-medium px-2 py-1 border rounded mr-1 ml-1"
+            >
+              {p.name}
+            </span>
+          ))}
+        </h4>
 
         {/* TERRAIN */}
         {matchResults.matches.map((m, i) => (
-          <div key={i} className={`p-3 w-fit border rounded space-y-2`}>
+          <div key={i} className={`p-3 mb-2 w-fit border rounded space-y-2`}>
             <div className="flex justify-between">
               <div>
                 <div className="font-medium">Terrain {i + 1}</div>
@@ -480,16 +492,6 @@ export default function BadmintonMatchmaker() {
               )}
             </div>
           </div>
-        ))}
-
-        <h4 className="mt-4 font-medium">Au repos :</h4>
-        {matchResults.resting.map((p) => (
-          <span
-            key={p.id}
-            className="inline-block px-2 py-1 border rounded mr-2"
-          >
-            {p.name}
-          </span>
         ))}
       </div>
     </div>
