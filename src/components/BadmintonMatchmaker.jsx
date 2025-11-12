@@ -282,10 +282,11 @@ export default function BadmintonMatchmaker() {
               </td>
 
               <td className="border px-2 py-1 text-center">
-                {player.pastPartners}
-                {player.pastPartners.forEach(function (value) {
-                  console.log(value);
-                })}
+                {[...player.pastPartners].map((partnerId) => (
+                  <span key={partnerId} className="mr-1">
+                    {players.find((p) => p.id === partnerId)?.name ?? "?"}
+                  </span>
+                ))}
               </td>
 
               {admin && (
