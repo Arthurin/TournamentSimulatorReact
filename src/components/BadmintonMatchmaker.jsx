@@ -365,7 +365,7 @@ export default function BadmintonMatchmaker() {
               }}
             >
               {matchmakingValidated
-                ? "C'est parti, les matchs ont commencés !"
+                ? "C'est parti, les matchs ont commencés ! Clique sur les gagnant·e·s"
                 : "Confirmer le matchmaking et commencer les matchs"}
             </button>
           )}
@@ -424,7 +424,7 @@ export default function BadmintonMatchmaker() {
                     </div>
                   ))}
                   {m.winner === null
-                    ? "Clique sur les gagnant·e·s"
+                    ? ""
                     : m.winner === "A"
                     ? "Victoire"
                     : " Défaite"}
@@ -472,7 +472,7 @@ export default function BadmintonMatchmaker() {
                     </div>
                   ))}
                   {m.winner === null
-                    ? "Clique sur les gagnant·e·s"
+                    ? ""
                     : m.winner === "B"
                     ? "Victoire"
                     : " Défaite"}
