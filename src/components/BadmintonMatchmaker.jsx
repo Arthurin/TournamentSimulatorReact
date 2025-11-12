@@ -316,13 +316,35 @@ export default function BadmintonMatchmaker() {
         </tbody>
       </table>
 
-      <h2 className="text-xl font-bold mt-6 mb-3">Round {roundCount}</h2>
+      <div className="flex mt-6 mb-3 text-xl align-baseline">
+        <div className="font-bold mr-2">Round {roundCount} -</div>
 
-      {matchmakingGenerated && (
-        <>
-          {matchResults.matches.every((m) => m.winner !== null) ? (
-            // Bouton Round Terminé //
-            // Tous les matchs ont été joués → bouton "Round terminé"
+        {matchmakingGenerated && (
+          <>
+            {matchResults.matches.every((m) => m.winner !== null) ? (
+              // Round Terminé //
+              <div className="text-emerald-700">Round terminé</div>
+            ) : matchmakingValidated ? (
+              <div className="text-emerald-700">Round en cours</div>
+            ) : (
+              // Validation du matchmaking
+              // Disparait une fois que le matchmaking est validé
+              <>
+                <div className="text-emerald-700">
+                  Round en attente de validation
+                </div>
+              </>
+            )}
+          </>
+        )}
+      </div>
+      <div className="flex align-baseline items-start">
+        <div className="mt-2 px-3 ps-0 py-2 font-bold">
+          Actions disponibles :{" "}
+        </div>
+        {
+          /* BOUTON Générer le prochain round : uniquement une fois le round actuel terminé ! */
+          matchResults.matches.every((m) => m.winner !== null) ? (
             <button
               className="cursor-pointer mt-2 px-3 py-2 bg-purple-600 text-white rounded opacity-100"
               onClick={() => {
@@ -334,43 +356,48 @@ export default function BadmintonMatchmaker() {
                 setMatchmakingValidated(false);
               }}
             >
-              Round terminé, passer au round suivant
+              Générer le round {roundCount + 1}
             </button>
+          ) : matchmakingValidated ? (
+            <div className="mt-2 px-3 py-2">
+              Clique sur les gagnant·e·s pour noter le score
+            </div>
           ) : (
-            // Bouton Validation du matchmaking //
-            // Il est désactivé si le matchmaking validé
-            <button
-              className={`mt-2 px-3 py-2 bg-green-600 rounded ${
-                matchmakingValidated
-                  ? "opacity-60 text-white cursor-not-allowed"
-                  : "opacity-100 text-white cursor-pointer"
-              }`}
-              disabled={matchmakingValidated}
-              onClick={() => {
-                // ✅ Incrémenter le compteur de repos pour les joueurs au repos
-                const restingIds = new Set(
-                  matchResults.resting.map((p) => p.id)
-                );
-                setPlayers((prev) =>
-                  prev.map((p) => ({
-                    ...p,
-                    restedLastRound: restingIds.has(p.id),
-                    restCount: restingIds.has(p.id)
-                      ? (p.restCount || 0) + 1
-                      : p.restCount || 0,
-                  }))
-                );
+            <>
+              <button className="cursor-not-allowed mt-2 px-3 py-2 bg-purple-400 text-white rounded opacity-60">
+                Round généré
+              </button>
+              <button
+                className={`mt-2 px-3 py-2 ml-3 bg-green-600 rounded ${
+                  matchmakingValidated
+                    ? "opacity-60 text-white cursor-not-allowed"
+                    : "opacity-100 text-white cursor-pointer"
+                }`}
+                disabled={matchmakingValidated}
+                onClick={() => {
+                  // ✅ Incrémenter le compteur de repos pour les joueurs au repos
+                  const restingIds = new Set(
+                    matchResults.resting.map((p) => p.id)
+                  );
+                  setPlayers((prev) =>
+                    prev.map((p) => ({
+                      ...p,
+                      restedLastRound: restingIds.has(p.id),
+                      restCount: restingIds.has(p.id)
+                        ? (p.restCount || 0) + 1
+                        : p.restCount || 0,
+                    }))
+                  );
 
-                setMatchmakingValidated(true);
-              }}
-            >
-              {matchmakingValidated
-                ? "C'est parti, les matchs ont commencés ! Clique sur les gagnant·e·s"
-                : "Confirmer le matchmaking et commencer les matchs"}
-            </button>
-          )}
-        </>
-      )}
+                  setMatchmakingValidated(true);
+                }}
+              >
+                Valider le matchmaking et commencer les matchs
+              </button>
+            </>
+          )
+        }
+      </div>
 
       {/* AFFICHAGE MATCHS */}
       <div className="mt-6">
