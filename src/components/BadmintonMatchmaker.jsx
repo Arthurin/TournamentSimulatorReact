@@ -48,7 +48,6 @@ export default function BadmintonMatchmaker() {
       name: playerName,
       wins: 0,
       pastPartners: new Set(),
-      pastOpponents: new Set(),
       lastRest: false,
     };
     return newPlayer;
@@ -254,7 +253,6 @@ export default function BadmintonMatchmaker() {
             <th className="border px-2 py-1">Victoires</th>
             <th className="border px-2 py-1">Nb Repos</th>
             <th className="border px-2 py-1">Partenaires précédents</th>
-            <th className="border px-2 py-1">Adversaires précédents</th>
             {admin && <th className="border px-2 py-1">Actions</th>}
           </tr>
         </thead>
@@ -290,12 +288,6 @@ export default function BadmintonMatchmaker() {
               <td className="border px-2 py-1 text-center">
                 {[...player.pastPartners]
                   .map((partnerId) => getName(players, partnerId))
-                  .join(" ; ")}
-              </td>
-
-              <td className="border px-2 py-1 text-center">
-                {[...player.pastOpponents]
-                  .map((oppId) => getName(players, oppId))
                   .join(" ; ")}
               </td>
 
