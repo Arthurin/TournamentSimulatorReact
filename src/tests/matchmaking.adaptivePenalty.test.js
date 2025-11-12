@@ -11,7 +11,7 @@ describe("generateMatches() - pondération adaptative", () => {
         pastPartners: new Set(["j2"]),
         partnersHistory: { j2: 3 }, // 3 matchs ensemble
         pastOpponents: new Set(),
-        lastRest: false,
+        restedLastRound: false,
       },
       {
         id: "j2",
@@ -20,7 +20,7 @@ describe("generateMatches() - pondération adaptative", () => {
         pastPartners: new Set(["j1"]),
         partnersHistory: { j1: 3 },
         pastOpponents: new Set(),
-        lastRest: false,
+        restedLastRound: false,
       },
       {
         id: "j3",
@@ -29,7 +29,7 @@ describe("generateMatches() - pondération adaptative", () => {
         pastPartners: new Set(),
         partnersHistory: {},
         pastOpponents: new Set(),
-        lastRest: false,
+        restedLastRound: false,
       },
       {
         id: "j4",
@@ -38,7 +38,7 @@ describe("generateMatches() - pondération adaptative", () => {
         pastPartners: new Set(),
         partnersHistory: {},
         pastOpponents: new Set(),
-        lastRest: false,
+        restedLastRound: false,
       },
     ];
 
@@ -64,7 +64,7 @@ describe("generateMatches() - pondération adaptative", () => {
         pastPartners: new Set(["j2", "j3"]),
         partnersHistory: { j2: 2, j3: 1 },
         pastOpponents: new Set(),
-        lastRest: false,
+        restedLastRound: false,
       },
       {
         id: "j2",
@@ -73,7 +73,7 @@ describe("generateMatches() - pondération adaptative", () => {
         pastPartners: new Set(["j1"]),
         partnersHistory: { j1: 2 },
         pastOpponents: new Set(),
-        lastRest: false,
+        restedLastRound: false,
       },
       {
         id: "j3",
@@ -82,7 +82,7 @@ describe("generateMatches() - pondération adaptative", () => {
         pastPartners: new Set(["j4", "j1"]),
         partnersHistory: { j4: 2, j1: 1 },
         pastOpponents: new Set(),
-        lastRest: false,
+        restedLastRound: false,
       },
       {
         id: "j4",
@@ -91,7 +91,7 @@ describe("generateMatches() - pondération adaptative", () => {
         pastPartners: new Set(["j3"]),
         partnersHistory: { j3: 2 },
         pastOpponents: new Set(),
-        lastRest: false,
+        restedLastRound: false,
       },
     ];
 
@@ -120,7 +120,7 @@ describe("generateMatches() - pondération adaptative", () => {
         pastPartners: new Set(["j2", "j3", "j4"]),
         partnersHistory: { j2: 2, j3: 1, j4: 1 },
         pastOpponents: new Set(),
-        lastRest: false,
+        restedLastRound: false,
       },
       {
         id: "j2",
@@ -129,7 +129,7 @@ describe("generateMatches() - pondération adaptative", () => {
         pastPartners: new Set(["j1", "j4"]),
         partnersHistory: { j1: 2, j4: 1 },
         pastOpponents: new Set(),
-        lastRest: false,
+        restedLastRound: false,
       },
       {
         id: "j3",
@@ -138,7 +138,7 @@ describe("generateMatches() - pondération adaptative", () => {
         pastPartners: new Set(["j1", "j55", "j66"]),
         partnersHistory: { j1: 1 },
         pastOpponents: new Set(),
-        lastRest: false,
+        restedLastRound: false,
       },
       {
         id: "j4",
@@ -147,7 +147,7 @@ describe("generateMatches() - pondération adaptative", () => {
         pastPartners: new Set(["j1", "j2"]),
         partnersHistory: { j1: 1, j2: 1 },
         pastOpponents: new Set(),
-        lastRest: false,
+        restedLastRound: false,
       },
     ];
 
@@ -177,7 +177,7 @@ it("favorise les joueurs ayant déjà eu plusieurs partenaires différents (dive
       pastPartners: new Set(["j2", "j3", "j4"]),
       partnersHistory: { j2: 1, j3: 1, j4: 1 },
       pastOpponents: new Set(),
-      lastRest: false,
+      restedLastRound: false,
     },
     {
       id: "j2",
@@ -186,7 +186,7 @@ it("favorise les joueurs ayant déjà eu plusieurs partenaires différents (dive
       pastPartners: new Set(["j1"]),
       partnersHistory: { j1: 1 },
       pastOpponents: new Set(),
-      lastRest: false,
+      restedLastRound: false,
     },
     {
       id: "j3",
@@ -195,7 +195,7 @@ it("favorise les joueurs ayant déjà eu plusieurs partenaires différents (dive
       pastPartners: new Set(["j1"]),
       partnersHistory: { j1: 1 },
       pastOpponents: new Set(),
-      lastRest: false,
+      restedLastRound: false,
     },
     {
       id: "j5",
@@ -204,7 +204,7 @@ it("favorise les joueurs ayant déjà eu plusieurs partenaires différents (dive
       pastPartners: new Set(),
       partnersHistory: {},
       pastOpponents: new Set(),
-      lastRest: false,
+      restedLastRound: false,
     },
   ];
 
@@ -277,5 +277,70 @@ describe("generateMatches() - cas partenaire déjà rencontré", () => {
     // Vérifie que les autres paires sont formées
     const allIds = [...teamAIds, ...teamBIds].sort();
     expect(allIds).toEqual(["j1", "j2", "j3", "j4"]);
+  });
+
+  it("On vérifie que la gestion des repos marche même quand les contraites des joueurs qui ont déjà joué est forte (j1 va jouer avec j4)", () => {
+    const players = [
+      {
+        id: "j1",
+        name: "J1",
+        wins: 4,
+        pastPartners: new Set(["j2", "j3", "j5"]),
+        partnersHistory: { j2: 2, j3: 1, j5: 1 },
+        pastOpponents: new Set(),
+        restedLastRound: true,
+      },
+      {
+        id: "j2",
+        name: "J2",
+        wins: 1,
+        pastPartners: new Set(["j1"]),
+        partnersHistory: { j1: 2 },
+        pastOpponents: new Set(),
+        restedLastRound: false,
+      },
+      {
+        id: "j3",
+        name: "J3",
+        wins: 1,
+        pastPartners: new Set(["j4", "j1"]),
+        partnersHistory: { j4: 2, j1: 1 },
+        pastOpponents: new Set(),
+        restedLastRound: false,
+      },
+      {
+        id: "j4",
+        name: "J4",
+        wins: 1,
+        pastPartners: new Set(["j3", "j1"]),
+        partnersHistory: { j3: 2, j1: 1 },
+        pastOpponents: new Set(),
+        restedLastRound: false,
+      },
+      {
+        id: "j5",
+        name: "J5",
+        wins: 1,
+        pastPartners: new Set(["j4", "j1"]),
+        partnersHistory: { j4: 2, j1: 1 },
+        pastOpponents: new Set(),
+        restedLastRound: false,
+      },
+    ];
+
+    const { matches } = generateMatches(players, 1);
+
+    expect(matches).toHaveLength(1);
+
+    const match = matches[0];
+
+    // J1 a déjà joué avec tout le monde mais il s'est reposé au dernier tour donc on force son entrée
+    const teamWithJ1 = match.teamA.some((p) => p.id === "j1")
+      ? match.teamA
+      : match.teamB;
+
+    const partnerOfJ1 = teamWithJ1.find((p) => p.id !== "j1");
+
+    expect(partnerOfJ1.id).toBe("j4");
   });
 });

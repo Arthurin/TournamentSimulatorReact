@@ -17,9 +17,13 @@ export function generateMatches(players, nbCourts = 7) {
     restingPlayers = [...restingPlayers, ...surplus];
   }
 
-  const forcedReturnees = restingPlayers.filter((p) => p.lastRest === true);
+  const forcedReturnees = restingPlayers.filter(
+    (p) => p.restedLastRound === true
+  );
   for (const returningPlayer of forcedReturnees) {
-    const candidateToSit = activeCandidates.find((p) => p.lastRest === false);
+    const candidateToSit = activeCandidates.find(
+      (p) => p.restedLastRound === false
+    );
     if (candidateToSit) {
       activeCandidates = activeCandidates.filter(
         (p) => p.id !== candidateToSit.id
@@ -33,8 +37,11 @@ export function generateMatches(players, nbCourts = 7) {
     }
   }
 
-  restingPlayers = restingPlayers.map((p) => ({ ...p, lastRest: true }));
-  activeCandidates = activeCandidates.map((p) => ({ ...p, lastRest: false }));
+  restingPlayers = restingPlayers.map((p) => ({ ...p, restedLastRound: true }));
+  activeCandidates = activeCandidates.map((p) => ({
+    ...p,
+    restedLastRound: false,
+  }));
 
   const matches = [];
 
