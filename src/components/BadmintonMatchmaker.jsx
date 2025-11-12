@@ -1,9 +1,9 @@
 // components/BadmintonMatchmaker.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { generateMatches } from "../utils/matchmaking";
 
 export default function BadmintonMatchmaker() {
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState(createInitialPlayers);
   const [newName, setNewName] = useState("");
 
   const [admin, setAdmin] = useState(false);
@@ -16,20 +16,37 @@ export default function BadmintonMatchmaker() {
     resting: [],
   });
 
+  function createInitialPlayers() {
+    const initialState = [
+      generatePlayerByName("j1"),
+      generatePlayerByName("j2"),
+      generatePlayerByName("j3"),
+      generatePlayerByName("j4"),
+      generatePlayerByName("j5"),
+      generatePlayerByName("j6"),
+      generatePlayerByName("j7"),
+      generatePlayerByName("j8"),
+      generatePlayerByName("j9"),
+    ];
+    return initialState;
+  }
+
   function addPlayer() {
     if (!newName.trim()) return;
-    setPlayers((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        name: newName.trim(),
-        wins: 0,
-        pastPartners: new Set(),
-        pastOpponents: new Set(),
-        lastRest: false,
-      },
-    ]);
+    setPlayers((prev) => [...prev, generatePlayerByName(newName.trim())]);
     setNewName("");
+  }
+
+  function generatePlayerByName(playerName) {
+    const newPlayer = {
+      id: crypto.randomUUID(),
+      name: playerName,
+      wins: 0,
+      pastPartners: new Set(),
+      pastOpponents: new Set(),
+      lastRest: false,
+    };
+    return newPlayer;
   }
 
   function startEdit(player) {
@@ -231,7 +248,7 @@ export default function BadmintonMatchmaker() {
             <th className="border px-2 py-1">Prénom</th>
             <th className="border px-2 py-1">Victoires</th>
             <th className="border px-2 py-1">Nb Repos</th>
-            <th className="border px-2 py-1">Partenaires</th>
+            <th className="border px-2 py-1">Partenaires précédents</th>
             {admin && <th className="border px-2 py-1">Actions</th>}
           </tr>
         </thead>
@@ -266,6 +283,9 @@ export default function BadmintonMatchmaker() {
 
               <td className="border px-2 py-1 text-center">
                 {player.pastPartners}
+                {player.pastPartners.forEach(function (value) {
+                  console.log(value);
+                })}
               </td>
 
               {admin && (
