@@ -117,22 +117,19 @@ export default function BadmintonMatchmaker() {
   }
 
   function recordMatchResult(match, winner) {
-    // winner = "A" ou "B"
     const winningTeam = winner === "A" ? match.teamA : match.teamB;
     const losingTeam = winner === "A" ? match.teamB : match.teamA;
 
-    // Mise à jour dans une nouvelle copie des players
+    // 1️⃣ Mise à jour des victoires
     setPlayers((prev) =>
       prev.map((p) => {
         const isWinner = winningTeam.some((w) => w.id === p.id);
-        if (isWinner) {
-          return { ...p, wins: (p.wins || 0) + 1 };
-        }
+        if (isWinner) return { ...p, wins: (p.wins || 0) + 1 };
         return p;
       })
     );
 
-    // Mise à jour des partenaires/adversaires
+    // 2️⃣ Mise à jour partenaires / partenaires history
     setPlayers((prev) => {
       const updated = new Map(
         prev.map((p) => [
@@ -140,28 +137,34 @@ export default function BadmintonMatchmaker() {
           {
             ...p,
             pastPartners: new Set(p.pastPartners),
-            pastOpponents: new Set(p.pastOpponents),
+            partnersHistory: { ...p.partnersHistory }, // ajout du compteur
           },
         ])
       );
 
-      const addHistory = (playerA, playerB, opponent1, opponent2) => {
+      const addHistory = (playerA, playerB) => {
+        // pastPartners
         updated.get(playerA.id).pastPartners.add(playerB.id);
         updated.get(playerB.id).pastPartners.add(playerA.id);
-        updated.get(playerA.id).pastOpponents.add(opponent1.id);
-        updated.get(playerA.id).pastOpponents.add(opponent2.id);
-        updated.get(playerB.id).pastOpponents.add(opponent1.id);
-        updated.get(playerB.id).pastOpponents.add(opponent2.id);
+
+        // partnersHistory
+        if (!updated.get(playerA.id).partnersHistory[playerB.id])
+          updated.get(playerA.id).partnersHistory[playerB.id] = 0;
+        updated.get(playerA.id).partnersHistory[playerB.id] += 1;
+
+        if (!updated.get(playerB.id).partnersHistory[playerA.id])
+          updated.get(playerB.id).partnersHistory[playerA.id] = 0;
+        updated.get(playerB.id).partnersHistory[playerA.id] += 1;
       };
 
-      // Partners + Opponents
-      addHistory(winningTeam[0], winningTeam[1], losingTeam[0], losingTeam[1]);
-      addHistory(losingTeam[0], losingTeam[1], winningTeam[0], winningTeam[1]);
+      // Pour chaque équipe, ajouter les paires
+      addHistory(winningTeam[0], winningTeam[1]);
+      addHistory(losingTeam[0], losingTeam[1]);
 
       return Array.from(updated.values());
     });
 
-    // ✅ Empêche nouveau clic
+    // 3️⃣ Empêche de recliquer sur ce match
     setMatchResults((prev) => ({
       ...prev,
       matches: prev.matches.map((m) => (m === match ? { ...m, winner } : m)),
@@ -170,23 +173,21 @@ export default function BadmintonMatchmaker() {
 
   function undoMatchResult(match) {
     const { winner, teamA, teamB } = match;
-    if (!winner) return; // rien à annuler
+    if (!winner) return;
 
     const winningTeam = winner === "A" ? teamA : teamB;
     const losingTeam = winner === "A" ? teamB : teamA;
 
-    // 1) Retirer les victoires ajoutées
+    // 1️⃣ Retirer les victoires
     setPlayers((prev) =>
       prev.map((p) => {
         const isWinner = winningTeam.some((w) => w.id === p.id);
-        if (isWinner) {
-          return { ...p, wins: Math.max(0, (p.wins || 0) - 1) };
-        }
+        if (isWinner) return { ...p, wins: Math.max(0, (p.wins || 0) - 1) };
         return p;
       })
     );
 
-    // 2) Retirer l'historique partenaires / adversaires
+    // 2️⃣ Retirer historique partenaires / partnersHistory
     setPlayers((prev) => {
       const updated = new Map(
         prev.map((p) => [
@@ -194,37 +195,32 @@ export default function BadmintonMatchmaker() {
           {
             ...p,
             pastPartners: new Set(p.pastPartners),
-            pastOpponents: new Set(p.pastOpponents),
+            partnersHistory: { ...p.partnersHistory },
           },
         ])
       );
 
-      const removeHistory = (playerA, playerB, opponent1, opponent2) => {
-        updated.get(playerA.id).pastPartners.delete(playerB.id);
-        updated.get(playerB.id).pastPartners.delete(playerA.id);
-        updated.get(playerA.id).pastOpponents.delete(opponent1.id);
-        updated.get(playerA.id).pastOpponents.delete(opponent2.id);
-        updated.get(playerB.id).pastOpponents.delete(opponent1.id);
-        updated.get(playerB.id).pastOpponents.delete(opponent2.id);
+      const removeHistory = (playerA, playerB) => {
+        updated.get(playerA.id).partnersHistory[playerB.id] -= 1;
+        if (updated.get(playerA.id).partnersHistory[playerB.id] <= 0) {
+          delete updated.get(playerA.id).partnersHistory[playerB.id];
+          updated.get(playerA.id).pastPartners.delete(playerB.id);
+        }
+
+        updated.get(playerB.id).partnersHistory[playerA.id] -= 1;
+        if (updated.get(playerB.id).partnersHistory[playerA.id] <= 0) {
+          delete updated.get(playerB.id).partnersHistory[playerA.id];
+          updated.get(playerB.id).pastPartners.delete(playerA.id);
+        }
       };
 
-      removeHistory(
-        winningTeam[0],
-        winningTeam[1],
-        losingTeam[0],
-        losingTeam[1]
-      );
-      removeHistory(
-        losingTeam[0],
-        losingTeam[1],
-        winningTeam[0],
-        winningTeam[1]
-      );
+      removeHistory(winningTeam[0], winningTeam[1]);
+      removeHistory(losingTeam[0], losingTeam[1]);
 
       return Array.from(updated.values());
     });
 
-    // 3) Remettre `winner` à null → les boutons redeviennent cliquables
+    // 3️⃣ Remettre winner à null
     setMatchResults((prev) => ({
       ...prev,
       matches: prev.matches.map((m) =>
