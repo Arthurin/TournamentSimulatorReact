@@ -207,7 +207,7 @@ export default function BadmintonMatchmaker() {
         onClick={() => setAdmin((a) => !a)}
       />
 
-      <h2 className="text-xl font-bold mb-3">Joueurs</h2>
+      <h2 className="text-xl font-bold mb-3">Liste des participant·e·s </h2>
 
       <input
         className="border p-1 rounded mr-2"
@@ -315,211 +315,212 @@ export default function BadmintonMatchmaker() {
           ))}
         </tbody>
       </table>
+      <div className="bg-neutral-100 p-5 mt-5">
+        <div className="flex mb-3 text-xl align-baseline">
+          <div className="font-bold mr-2">Round {roundCount} -</div>
 
-      <div className="flex mt-6 mb-3 text-xl align-baseline">
-        <div className="font-bold mr-2">Round {roundCount} -</div>
-
-        {matchmakingGenerated && (
-          <>
-            {matchResults.matches.every((m) => m.winner !== null) ? (
-              // Round Terminé //
-              <div className="text-emerald-700">Round terminé</div>
-            ) : matchmakingValidated ? (
-              <div className="text-emerald-700">Round en cours</div>
-            ) : (
-              // Validation du matchmaking
-              // Disparait une fois que le matchmaking est validé
-              <>
-                <div className="text-emerald-700">
-                  Round en attente de validation
-                </div>
-              </>
-            )}
-          </>
-        )}
-      </div>
-      <div className="flex align-baseline items-start">
-        <div className="mt-2 px-3 ps-0 py-2 font-bold">
-          Actions disponibles :{" "}
-        </div>
-        {
-          /* BOUTON Générer le prochain round : uniquement une fois le round actuel terminé ! */
-          matchResults.matches.every((m) => m.winner !== null) ? (
-            <button
-              className="cursor-pointer mt-2 px-3 py-2 bg-purple-600 text-white rounded opacity-100"
-              onClick={() => {
-                // Incrémenter le compteur de round
-                setRoundCount((r) => r + 1);
-                // Générer de nouvelles équipes
-                runMatchmaking();
-                setMatchmakingGenerated(true);
-                setMatchmakingValidated(false);
-              }}
-            >
-              Générer le round {roundCount + 1}
-            </button>
-          ) : matchmakingValidated ? (
-            <div className="mt-2 px-3 py-2">
-              Clique sur les gagnant·e·s pour noter le score
-            </div>
-          ) : (
+          {matchmakingGenerated && (
             <>
-              <button className="cursor-not-allowed mt-2 px-3 py-2 bg-purple-400 text-white rounded opacity-60">
-                Round généré
-              </button>
+              {matchResults.matches.every((m) => m.winner !== null) ? (
+                // Round Terminé //
+                <div className="text-black">Round terminé</div>
+              ) : matchmakingValidated ? (
+                <div className="text-emerald-700">Round en cours</div>
+              ) : (
+                // Validation du matchmaking
+                // Disparait une fois que le matchmaking est validé
+                <>
+                  <div className="text-amber-500">
+                    Round en attente de validation
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </div>
+        <div className="flex align-baseline items-start">
+          <div className="mt-2 px-3 ps-0 py-2 font-bold">
+            Actions disponibles :{" "}
+          </div>
+          {
+            /* BOUTON Générer le prochain round : uniquement une fois le round actuel terminé ! */
+            matchResults.matches.every((m) => m.winner !== null) ? (
               <button
-                className={`mt-2 px-3 py-2 ml-3 bg-green-600 rounded ${
-                  matchmakingValidated
-                    ? "opacity-60 text-white cursor-not-allowed"
-                    : "opacity-100 text-white cursor-pointer"
-                }`}
-                disabled={matchmakingValidated}
+                className="cursor-pointer mt-2 px-3 py-2 bg-amber-500 text-white rounded opacity-100"
                 onClick={() => {
-                  // ✅ Incrémenter le compteur de repos pour les joueurs au repos
-                  const restingIds = new Set(
-                    matchResults.resting.map((p) => p.id)
-                  );
-                  setPlayers((prev) =>
-                    prev.map((p) => ({
-                      ...p,
-                      restedLastRound: restingIds.has(p.id),
-                      restCount: restingIds.has(p.id)
-                        ? (p.restCount || 0) + 1
-                        : p.restCount || 0,
-                    }))
-                  );
-
-                  setMatchmakingValidated(true);
+                  // Incrémenter le compteur de round
+                  setRoundCount((r) => r + 1);
+                  // Générer de nouvelles équipes
+                  runMatchmaking();
+                  setMatchmakingGenerated(true);
+                  setMatchmakingValidated(false);
                 }}
               >
-                Valider le matchmaking et commencer les matchs
+                Générer le round {roundCount + 1}
               </button>
-            </>
-          )
-        }
-      </div>
+            ) : matchmakingValidated ? (
+              <div className="mt-2 px-3 py-2 ps-0">
+                Clique sur les gagnant·e·s pour noter le score
+              </div>
+            ) : (
+              <>
+                <button className="cursor-not-allowed mt-2 px-3 py-2 bg-amber-400 text-white rounded opacity-70">
+                  Round généré
+                </button>
+                <button
+                  className={`mt-2 px-3 py-2 ml-3 bg-green-600 rounded ${
+                    matchmakingValidated
+                      ? "opacity-60 text-white cursor-not-allowed"
+                      : "opacity-100 text-white cursor-pointer"
+                  }`}
+                  disabled={matchmakingValidated}
+                  onClick={() => {
+                    // ✅ Incrémenter le compteur de repos pour les joueurs au repos
+                    const restingIds = new Set(
+                      matchResults.resting.map((p) => p.id)
+                    );
+                    setPlayers((prev) =>
+                      prev.map((p) => ({
+                        ...p,
+                        restedLastRound: restingIds.has(p.id),
+                        restCount: restingIds.has(p.id)
+                          ? (p.restCount || 0) + 1
+                          : p.restCount || 0,
+                      }))
+                    );
 
-      {/* AFFICHAGE MATCHS */}
-      <div className="mt-6">
-        <h4 className="mt-3 font-bold mb-2">
-          Au repos :
-          {matchResults.resting.map((p) => (
-            <span
-              key={p.id}
-              className="inline-block font-medium px-2 py-1 border rounded mr-1 ml-1"
-            >
-              {p.name}
-            </span>
-          ))}
-        </h4>
+                    setMatchmakingValidated(true);
+                  }}
+                >
+                  Valider le matchmaking et commencer les matchs
+                </button>
+              </>
+            )
+          }
+        </div>
 
-        {/* TERRAIN */}
-        {matchResults.matches.map((m, i) => (
-          <div key={i} className={`p-3 mb-2 w-fit border rounded space-y-2`}>
-            <div className="flex justify-between">
-              <div>
-                <div className="font-medium">Terrain {i + 1}</div>
+        {/* AFFICHAGE MATCHS */}
+        <div className="mt-6">
+          <h4 className="mt-3 font-bold mb-2">
+            Au repos :
+            {matchResults.resting.map((p) => (
+              <span
+                key={p.id}
+                className="inline-block font-medium px-2 py-1 border rounded mr-1 ml-1"
+              >
+                {p.name}
+              </span>
+            ))}
+          </h4>
+
+          {/* TERRAIN */}
+          {matchResults.matches.map((m, i) => (
+            <div key={i} className={`p-3 mb-2 w-fit border rounded space-y-2`}>
+              <div className="flex justify-between">
+                <div>
+                  <div className="font-medium">Terrain {i + 1}</div>
+                </div>
+              </div>
+
+              {/* ✅ matchs et boutons résultat */}
+              <div className="flex gap-2">
+                {/* EQUIPE A */}
+                {matchmakingValidated ? (
+                  /*Affichage du bouton pour saisir les gagnants*/
+                  <button
+                    onClick={() => {
+                      if (m.winner === "A") {
+                        undoMatchResult(m); // annule si on reclique sur le gagnant
+                      } else if (!m.winner) {
+                        recordMatchResult(m, "A"); // enregistre si pas encore de gagnant
+                      }
+                    }}
+                    className={`px-3 py-1 rounded ${
+                      m.winner === "A"
+                        ? "bg-green-500 text-white"
+                        : "bg-blue-600 text-white hover:bg-green-500"
+                    } ${
+                      m.winner && m.winner !== "A"
+                        ? "opacity-60 cursor-not-allowed"
+                        : "cursor-pointer"
+                    }`}
+                  >
+                    {m.teamA.map((p) => (
+                      <div key={p.id}>
+                        {p.name} (wins: {p.wins})
+                      </div>
+                    ))}
+                    {m.winner === null
+                      ? ""
+                      : m.winner === "A"
+                      ? "Victoire"
+                      : " Défaite"}
+                  </button>
+                ) : (
+                  /*Affichage du texte, on met les boutons que si c'est validé*/
+                  <button
+                    disabled
+                    className="px-3 py-1 bg-blue-600 text-white rounded"
+                  >
+                    {m.teamA.map((p) => (
+                      <div key={p.id}>
+                        {p.name} (wins: {p.wins})
+                      </div>
+                    ))}
+                  </button>
+                )}
+
+                <div className="px-2 self-center">VS</div>
+
+                {/* EQUIPE B */}
+                {matchmakingValidated ? (
+                  /*Affichage du bouton pour saisir les gagnants*/
+                  <button
+                    onClick={() => {
+                      if (m.winner === "B") {
+                        undoMatchResult(m); // annule si on reclique sur le gagnant
+                      } else if (!m.winner) {
+                        recordMatchResult(m, "B"); // enregistre si pas encore de gagnant
+                      }
+                    }}
+                    className={`px-3 py-1 rounded ${
+                      m.winner === "B"
+                        ? "bg-green-500 text-white"
+                        : "bg-pink-600 text-white hover:bg-green-500"
+                    } ${
+                      m.winner && m.winner !== "B"
+                        ? "opacity-60 cursor-not-allowed"
+                        : "cursor-pointer"
+                    }`}
+                  >
+                    {m.teamB.map((p) => (
+                      <div key={p.id}>
+                        {p.name} (wins: {p.wins})
+                      </div>
+                    ))}
+                    {m.winner === null
+                      ? ""
+                      : m.winner === "B"
+                      ? "Victoire"
+                      : " Défaite"}
+                  </button>
+                ) : (
+                  /*Affichage du texte, on met les boutons que si c'est validé*/
+                  <button
+                    disabled
+                    className="px-3 py-1 bg-pink-600 text-white rounded"
+                  >
+                    {m.teamB.map((p) => (
+                      <div key={p.id}>
+                        {p.name} (wins: {p.wins})
+                      </div>
+                    ))}
+                  </button>
+                )}
               </div>
             </div>
-
-            {/* ✅ matchs et boutons résultat */}
-            <div className="flex gap-2">
-              {/* EQUIPE A */}
-              {matchmakingValidated ? (
-                /*Affichage du bouton pour saisir les gagnants*/
-                <button
-                  onClick={() => {
-                    if (m.winner === "A") {
-                      undoMatchResult(m); // annule si on reclique sur le gagnant
-                    } else if (!m.winner) {
-                      recordMatchResult(m, "A"); // enregistre si pas encore de gagnant
-                    }
-                  }}
-                  className={`px-3 py-1 rounded ${
-                    m.winner === "A"
-                      ? "bg-green-500 text-white"
-                      : "bg-blue-600 text-white hover:bg-green-500"
-                  } ${
-                    m.winner && m.winner !== "A"
-                      ? "opacity-60 cursor-not-allowed"
-                      : "cursor-pointer"
-                  }`}
-                >
-                  {m.teamA.map((p) => (
-                    <div key={p.id}>
-                      {p.name} (wins: {p.wins})
-                    </div>
-                  ))}
-                  {m.winner === null
-                    ? ""
-                    : m.winner === "A"
-                    ? "Victoire"
-                    : " Défaite"}
-                </button>
-              ) : (
-                /*Affichage du texte, on met les boutons que si c'est validé*/
-                <button
-                  disabled
-                  className="px-3 py-1 bg-blue-600 text-white rounded"
-                >
-                  {m.teamA.map((p) => (
-                    <div key={p.id}>
-                      {p.name} (wins: {p.wins})
-                    </div>
-                  ))}
-                </button>
-              )}
-
-              <div className="px-2 self-center">VS</div>
-
-              {/* EQUIPE B */}
-              {matchmakingValidated ? (
-                /*Affichage du bouton pour saisir les gagnants*/
-                <button
-                  onClick={() => {
-                    if (m.winner === "B") {
-                      undoMatchResult(m); // annule si on reclique sur le gagnant
-                    } else if (!m.winner) {
-                      recordMatchResult(m, "B"); // enregistre si pas encore de gagnant
-                    }
-                  }}
-                  className={`px-3 py-1 rounded ${
-                    m.winner === "B"
-                      ? "bg-green-500 text-white"
-                      : "bg-pink-600 text-white hover:bg-green-500"
-                  } ${
-                    m.winner && m.winner !== "B"
-                      ? "opacity-60 cursor-not-allowed"
-                      : "cursor-pointer"
-                  }`}
-                >
-                  {m.teamB.map((p) => (
-                    <div key={p.id}>
-                      {p.name} (wins: {p.wins})
-                    </div>
-                  ))}
-                  {m.winner === null
-                    ? ""
-                    : m.winner === "B"
-                    ? "Victoire"
-                    : " Défaite"}
-                </button>
-              ) : (
-                /*Affichage du texte, on met les boutons que si c'est validé*/
-                <button
-                  disabled
-                  className="px-3 py-1 bg-pink-600 text-white rounded"
-                >
-                  {m.teamB.map((p) => (
-                    <div key={p.id}>
-                      {p.name} (wins: {p.wins})
-                    </div>
-                  ))}
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
