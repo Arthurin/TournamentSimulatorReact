@@ -247,18 +247,28 @@ export default function BadmintonMatchmaker() {
           ? "Regénérer les matchs (en cas d'ajout de joueur·euse·s)"
           : "Générer les matchs"}
       </button>
-      <div className="overflow-x-auto">
-        <table className="mt-3 table-auto border-collapse border w-full">
-          <thead>
+      <div className="overflow-x-auto overflow-y-auto max-h-[80vh] relative scrollbar-thick scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+        <table className="mt-3 table-auto border-collapse border w-full min-w-[900px]">
+          <thead className="bg-gray-100 border-2 border-black sticky top-0 z-30">
             <tr>
               {/* Colonne prénom fixe */}
-              <th className="border px-2 py-1 sticky left-0 bg-white z-10">
+              <th className="border px-2 py-1 sticky left-0 bg-white z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.2)]">
                 Prénom
               </th>
-              <th className="border px-2 py-1">Victoires</th>
-              <th className="border px-2 py-1">Nb Repos</th>
-              <th className="border px-2 py-1">Partenaires précédents</th>
-              {admin && <th className="border px-2 py-1">Actions</th>}
+              <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
+                Victoires
+              </th>
+              <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
+                Nb Repos
+              </th>
+              <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
+                Partenaires précédents
+              </th>
+              {admin && (
+                <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
+                  Actions
+                </th>
+              )}
 
               {/* Colonnes rounds inversées */}
               {Array.from(
@@ -277,7 +287,8 @@ export default function BadmintonMatchmaker() {
                   return (
                     <th
                       key={i}
-                      className="border px-2 py-1 text-center bg-gray-100 sticky top-0"
+                      className={`border border-black px-2 py-1 text-center sticky top-0 z-20 
+                      }`}
                     >
                       Round {roundIndex + 1}
                     </th>
@@ -289,9 +300,9 @@ export default function BadmintonMatchmaker() {
 
           <tbody>
             {players.map((player) => (
-              <tr key={player.id}>
+              <tr key={player.id} className="hover:bg-gray-50">
                 {/* Prénom fixe */}
-                <td className="border px-2 py-1 sticky left-0 bg-white z-10">
+                <td className="border px-2 py-1 sticky left-0 bg-white z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.2)]">
                   {admin && editingPlayerId === player.id ? (
                     <input
                       value={editName}
@@ -302,18 +313,7 @@ export default function BadmintonMatchmaker() {
                   )}
                 </td>
 
-                <td className="border px-2 py-1 text-center">
-                  {admin && editingPlayerId === player.id ? (
-                    <input
-                      type="number"
-                      value={editWins}
-                      onChange={(e) => setEditWins(Number(e.target.value))}
-                    />
-                  ) : (
-                    player.wins
-                  )}
-                </td>
-
+                <td className="border px-2 py-1 text-center">{player.wins}</td>
                 <td className="border px-2 py-1 text-center">
                   {player.restCount || 0}
                 </td>
@@ -356,7 +356,7 @@ export default function BadmintonMatchmaker() {
                   </td>
                 )}
 
-                {/* 🆕 Colonnes rounds */}
+                {/* Colonnes rounds */}
                 {Array.from(
                   {
                     length: Math.max(
@@ -372,11 +372,14 @@ export default function BadmintonMatchmaker() {
                       i;
                     const round = player.roundHistory?.[roundIndex];
 
+                    const baseColor =
+                      i % 2 === 0 ? "bg-gray-50" : "bg-gray-200";
+
                     if (!round) {
                       return (
                         <td
                           key={i}
-                          className="border px-2 py-1 text-center text-gray-300"
+                          className={`border px-2 py-1 text-center text-gray-300`}
                         >
                           –
                         </td>
@@ -387,7 +390,7 @@ export default function BadmintonMatchmaker() {
                       return (
                         <td
                           key={i}
-                          className="border px-2 py-1 text-center italic text-gray-500 bg-gray-100 whitespace-nowrap"
+                          className={`border px-2 py-1 text-center italic text-gray-500`}
                         >
                           Repos 💤
                         </td>
