@@ -32,7 +32,20 @@ export default function BadmintonMatchmaker() {
 
   function addPlayer() {
     if (!newName.trim()) return;
-    setPlayers((prev) => [...prev, generatePlayerByName(newName.trim())]);
+
+    // Séparer sur " ; "
+    const names = newName
+      .split(";")
+      .map((n) => n.trim())
+      .filter((n) => n.length > 0);
+
+    if (names.length === 0) return;
+
+    setPlayers((prev) => [
+      ...prev,
+      ...names.map((name) => generatePlayerByName(name)),
+    ]);
+
     setNewName("");
   }
 
@@ -257,8 +270,8 @@ export default function BadmintonMatchmaker() {
           disabled={matchmakingValidated}
         >
           {matchResults.matches.length !== 0
-            ? "Regénérer les matchs (en cas d'ajout de joueur·euse·s)"
-            : "Générer les matchs"}
+            ? "Regénérer le round (en cas d'ajout de joueur·euse·s)"
+            : "Générer le round"}
         </button>
       </div>
 
