@@ -32,36 +32,31 @@ export function generateMatches(players, nbCourts = 7) {
   // 5️⃣ Fonction de coût pour évaluer la compatibilité des paires
   function matchCost(a, b) {
     // ⚙️ Pondérations ajustées
-    const PENALTY_PARTNER = 1000; // grosse pénalité si déjà partenaires
-    const PENALTY_REPEAT_COUNT = 300; // pénalité additionnelle par répétition
-    const BONUS_DIVERSITY = 5; // petite réduction du coût si diversité
+    const PENALTY_PARTNER = 800; // un peu moins fort
+    const PENALTY_REPEAT_COUNT = 200;
+    const BONUS_DIVERSITY = 5;
+    const PENALTY_VICTORY_GAP = 120; // ⚠️ nouveau poids fort sur les écarts de victoires
 
     let cost = 0;
 
-    // 1) Très forte pénalité si les deux ont déjà été partenaires
+    // 1️⃣ Pénalité si déjà partenaires
     if (a.pastPartners?.has(b.id) || b.pastPartners?.has(a.id)) {
       const countA = a.partnersHistory?.[b.id] || 0;
       const countB = b.partnersHistory?.[a.id] || 0;
-      // plus ils se sont rencontrés souvent, plus la pénalité augmente
       cost += PENALTY_PARTNER + (countA + countB) * PENALTY_REPEAT_COUNT;
     }
 
-    // 2) Bonus pour la diversité : plus les joueurs ont eu de partenaires différents,
-    //    moins on les pénalise (on soustrait un petit montant).
-    //    Ici BONUS_DIVERSITY * (divA + divB) réduit le coût (donc rend la paire plus désirable)
+    // 2️⃣ Pénalité selon la différence de victoires (plus ils sont éloignés, plus c’est cher)
+    const winGap = Math.abs((a.wins || 0) - (b.wins || 0));
+    cost += winGap * PENALTY_VICTORY_GAP;
+
+    // 3️⃣ Bonus diversité
     const diversityA = a.pastPartners?.size ?? 0;
     const diversityB = b.pastPartners?.size ?? 0;
     cost -= (diversityA + diversityB) * BONUS_DIVERSITY;
 
-    // (optionnel) très léger tie-breaker pour stabilité
+    // 4️⃣ Très léger tie-breaker
     cost += (Math.random() - 0.5) * 1e-6;
-
-    // debug log (tu peux commenter si trop verbeux)
-    console.log(
-      `Compatibilité ${a.name}-${b.name} : coût=${cost.toFixed(
-        2
-      )} (divA=${diversityA}, divB=${diversityB})`
-    );
 
     return cost;
   }
