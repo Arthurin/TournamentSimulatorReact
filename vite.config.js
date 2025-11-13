@@ -3,13 +3,13 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
-// https://vite.dev/config/
-export default defineConfig({
-  base: "/TournamentSimulatorReact/",
+export default defineConfig(({ command }) => ({
+  base:
+    process.env.NODE_ENV === "production" ? "/TournamentSimulatorReact/" : "/",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-});
+}));
