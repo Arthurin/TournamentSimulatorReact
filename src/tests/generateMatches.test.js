@@ -1,4 +1,4 @@
-import { generateMatches } from "@/utils/matchmaking.js";
+import { generateMatches, validateRound } from "@/utils/matchmaking.js";
 import { describe, it, expect } from "vitest";
 
 function makePlayers(n) {
@@ -78,5 +78,91 @@ describe("generateMatches() Gestion des pauses", () => {
       const uniqueIds = new Set(allPlayers.map((p) => p.id));
       expect(uniqueIds.size).toBe(4);
     }
+  });
+});
+
+describe("validateRound()", () => {
+  it("ajoute correctement une entrée dans roundHistory pour chaque joueur", () => {
+    // --- Données d'entrée simulées ---
+    const players = [
+      { id: "j1", name: "j1", restCount: 0, roundHistory: [] },
+      { id: "j2", name: "j2", restCount: 0, roundHistory: [] },
+      { id: "j3", name: "j3", restCount: 0, roundHistory: [] },
+      { id: "j4", name: "j4", restCount: 0, roundHistory: [] },
+      { id: "j5", name: "j5", restCount: 0, roundHistory: [] },
+    ];
+
+    const matchResults = {
+      matches: [
+        {
+          teamA: [
+            { id: "j1", name: "j1" },
+            { id: "j2", name: "j2" },
+          ],
+          teamB: [
+            { id: "j3", name: "j3" },
+            { id: "j4", name: "j4" },
+          ],
+          winner: "A", // j1 et j2 gagnent
+        },
+      ],
+      resting: [{ id: "j5", name: "j5" }],
+    };
+
+    // --- Appel de la fonction ---
+    const updatedPlayers = validateRound(players, matchResults);
+
+    // --- Vérifications ---
+    const j1 = updatedPlayers.find((p) => p.id === "j1");
+    const j2 = updatedPlayers.find((p) => p.id === "j2");
+    const j3 = updatedPlayers.find((p) => p.id === "j3");
+    const j4 = updatedPlayers.find((p) => p.id === "j4");
+    const j5 = updatedPlayers.find((p) => p.id === "j5");
+
+    // ✅ Chaque joueur a bien un historique d'un round
+    expect(j1.roundHistory).toHaveLength(1);
+    expect(j5.roundHistory).toHaveLength(1);
+
+    // ✅ Victoire de j1 et j2
+    expect(j1.roundHistory[0]).toMatchObject({
+      partner: "j2",
+      opponents: ["j3", "j4"],
+      won: true,
+      result: "win",
+    });
+
+    expect(j2.roundHistory[0]).toMatchObject({
+      partner: "j1",
+      opponents: ["j3", "j4"],
+      won: true,
+      result: "win",
+    });
+
+    // ✅ Défaite de j3 et j4
+    expect(j3.roundHistory[0]).toMatchObject({
+      partner: "j4",
+      opponents: ["j1", "j2"],
+      won: false,
+      result: "loss",
+    });
+
+    expect(j4.roundHistory[0]).toMatchObject({
+      partner: "j3",
+      opponents: ["j1", "j2"],
+      won: false,
+      result: "loss",
+    });
+
+    // ✅ Joueur au repos
+    expect(j5.roundHistory[0]).toMatchObject({
+      result: "rest",
+      partner: null,
+      opponents: [],
+      won: false,
+    });
+
+    // ✅ Rest count bien incrémenté
+    expect(j5.restCount).toBe(1);
+    expect(j1.restCount).toBe(0);
   });
 });

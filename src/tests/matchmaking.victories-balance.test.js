@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateMatches, validateMatchmaking } from "@/utils/matchmaking.js";
+import { generateMatches, validateRound } from "@/utils/matchmaking.js";
 
 describe("matchmaking - équilibre des victoires entre équipiers", () => {
   it("échoue si des joueurs aux victoires trop éloignées jouent ensemble (cas j8 vs j21)", () => {
@@ -46,7 +46,7 @@ describe("matchmaking - équilibre des victoires entre équipiers", () => {
       }
 
       // ✅ Validation du round
-      players = validateMatchmaking(players, { matches, resting });
+      players = validateRound(players, { matches, resting });
 
       // Log pour debug
       console.log(

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { generateMatches, validateMatchmaking } from "@/utils/matchmaking";
+import { generateMatches, validateRound } from "@/utils/matchmaking";
 
 describe("Matchmaking round complet", () => {
   it("génère les matchs et met à jour les repos correctement", () => {
@@ -23,7 +23,7 @@ describe("Matchmaking round complet", () => {
     expect(resting.length).toBe(1); // 1 joueur restant (j9)
 
     // Validation du matchmaking (incrément des repos)
-    const updatedPlayers = validateMatchmaking(players, { matches, resting });
+    const updatedPlayers = validateRound(players, { matches, resting });
 
     // Vérification : le joueur restant (j9) a bien son restCount incrémenté
     const j9 = updatedPlayers.find((p) => p.id === 9);
@@ -40,7 +40,7 @@ describe("Matchmaking round complet", () => {
   });
 });
 
-describe("validateMatchmaking", () => {
+describe("validateRound", () => {
   it("met correctement à jour restedLastRound et restCount", () => {
     const players = [
       { id: 1, name: "j1", restedLastRound: false, restCount: 0 },
@@ -56,7 +56,7 @@ describe("validateMatchmaking", () => {
       ],
     };
 
-    const updatedPlayers = validateMatchmaking(players, matchResults);
+    const updatedPlayers = validateRound(players, matchResults);
 
     // Vérification des joueurs au repos
     const j1 = updatedPlayers.find((p) => p.id === 1);
@@ -93,7 +93,7 @@ describe("Simulation multi-rounds avec logs détaillés", () => {
       const { matches, resting } = generateMatches(currentPlayers, 2);
 
       // Mise à jour des compteurs de repos
-      currentPlayers = validateMatchmaking(currentPlayers, {
+      currentPlayers = validateRound(currentPlayers, {
         matches,
         resting,
       });
@@ -149,7 +149,7 @@ describe("simulate 4 rounds - j9 resting imbalance", () => {
       }
 
       // ⚙️ Applique la validation du round
-      players = validateMatchmaking(players, { resting, matches });
+      players = validateRound(players, { resting, matches });
 
       console.log(
         `Round ${round}: repos =`,

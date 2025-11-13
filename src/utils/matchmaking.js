@@ -117,13 +117,62 @@ export function generateMatches(players, nbCourts = 7) {
 }
 
 // ✅ Nouvelle fonction : validation du matchmaking (repos + compteur)
-export function validateMatchmaking(players, matchResults) {
+export function validateRound(players, matchResults) {
   const restingIds = new Set(matchResults.resting.map((p) => p.id));
 
   // On retourne les joueurs mis à jour sans toucher au composant
-  return players.map((p) => ({
-    ...p,
-    restedLastRound: restingIds.has(p.id),
-    restCount: restingIds.has(p.id) ? (p.restCount || 0) + 1 : p.restCount || 0,
-  }));
+  return players.map((p) => {
+    // 🔹 Chercher le match auquel ce joueur a participé (s'il n'était pas au repos)
+    const playerMatch = matchResults.matches.find(
+      (m) =>
+        m.teamA.some((t) => t.id === p.id) || m.teamB.some((t) => t.id === p.id)
+    );
+
+    // 🔹 Construire une entrée d’historique pour ce round
+    let roundEntry = null;
+    if (playerMatch) {
+      const terrain = matchResults.matches.indexOf(playerMatch) + 1; // le numéro de terrain
+      const isTeamA = playerMatch.teamA.some((t) => t.id === p.id);
+      const partner = isTeamA
+        ? playerMatch.teamA.find((t) => t.id !== p.id)
+        : playerMatch.teamB.find((t) => t.id !== p.id);
+
+      const opponents = isTeamA
+        ? playerMatch.teamB.map((t) => t.name)
+        : playerMatch.teamA.map((t) => t.name);
+
+      const winnerTeam = playerMatch.winner; // peut être 'A', 'B', ou null
+
+      const didWin =
+        winnerTeam &&
+        ((winnerTeam === "A" && isTeamA) || (winnerTeam === "B" && !isTeamA));
+
+      roundEntry = {
+        terrain,
+        partner: partner?.name || null,
+        opponents,
+        won: !!didWin,
+        result: winnerTeam ? (didWin ? "win" : "loss") : "pending",
+      };
+    } else if (restingIds.has(p.id)) {
+      // 🔹 S'il était au repos
+      roundEntry = {
+        terrain: null,
+        partner: null,
+        opponents: [],
+        won: false,
+        result: "rest",
+      };
+    }
+
+    // 🔹 Retourner le joueur mis à jour
+    return {
+      ...p,
+      restedLastRound: restingIds.has(p.id),
+      restCount: restingIds.has(p.id)
+        ? (p.restCount || 0) + 1
+        : p.restCount || 0,
+      roundHistory: [...(p.roundHistory || []), roundEntry].filter(Boolean),
+    };
+  });
 }

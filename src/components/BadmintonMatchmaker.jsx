@@ -1,6 +1,6 @@
 // components/BadmintonMatchmaker.jsx
 import { useState, useEffect } from "react";
-import { generateMatches, validateMatchmaking } from "../utils/matchmaking";
+import { generateMatches, validateRound } from "../utils/matchmaking";
 
 function getName(players, id) {
   const p = players.find((player) => player.id === id);
@@ -74,6 +74,19 @@ export default function BadmintonMatchmaker() {
 
   function deletePlayer(id) {
     setPlayers((prev) => prev.filter((p) => p.id !== id));
+  }
+
+  function endRoundAndStartNext() {
+    // ✅ Incrémenter le compteur de repos pour les joueurs au repos
+    const updatedPlayers = validateRound(players, matchResults);
+    setPlayers(updatedPlayers);
+
+    // Incrémenter le compteur de round
+    setRoundCount((r) => r + 1);
+    // Générer de nouvelles équipes
+    runMatchmaking();
+    setMatchmakingGenerated(true);
+    setMatchmakingValidated(false);
   }
 
   function runMatchmaking() {
@@ -234,87 +247,186 @@ export default function BadmintonMatchmaker() {
           ? "Regénérer les matchs (en cas d'ajout de joueur·euse·s)"
           : "Générer les matchs"}
       </button>
+      <div className="overflow-x-auto">
+        <table className="mt-3 table-auto border-collapse border w-full">
+          <thead>
+            <tr>
+              {/* Colonne prénom fixe */}
+              <th className="border px-2 py-1 sticky left-0 bg-white z-10">
+                Prénom
+              </th>
+              <th className="border px-2 py-1">Victoires</th>
+              <th className="border px-2 py-1">Nb Repos</th>
+              <th className="border px-2 py-1">Partenaires précédents</th>
+              {admin && <th className="border px-2 py-1">Actions</th>}
 
-      <table className="mt-3 table-auto border-collapse border w-full">
-        <thead>
-          <tr>
-            <th className="border px-2 py-1">Prénom</th>
-            <th className="border px-2 py-1">Victoires</th>
-            <th className="border px-2 py-1">Nb Repos</th>
-            <th className="border px-2 py-1">Partenaires précédents</th>
-            {admin && <th className="border px-2 py-1">Actions</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {players.map((player) => (
-            <tr key={player.id}>
-              <td className="border px-2 py-1">
-                {admin && editingPlayerId === player.id ? (
-                  <input
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                  />
-                ) : (
-                  player.name
-                )}
-              </td>
-              <td className="border px-2 py-1 text-center">
-                {admin && editingPlayerId === player.id ? (
-                  <input
-                    type="number"
-                    value={editWins}
-                    onChange={(e) => setEditWins(Number(e.target.value))}
-                  />
-                ) : (
-                  player.wins
-                )}
-              </td>
-
-              <td className="border px-2 py-1 text-center">
-                {player.restCount || 0}
-              </td>
-
-              <td className="border px-2 py-1 text-center">
-                {[...player.pastPartners]
-                  .map((partnerId) => {
-                    const name = getName(players, partnerId);
-                    const count = player.partnersHistory?.[partnerId] || 1; // par défaut 1
-                    return count > 1 ? `${name} (x${count})` : name;
-                  })
-                  .join(" ; ")}
-              </td>
-
-              {admin && (
-                <td className="border px-2 py-1 text-center">
-                  {editingPlayerId === player.id ? (
-                    <button
-                      className="text-green-600"
-                      onClick={() => confirmEdit(player.id)}
+              {/* Colonnes rounds inversées */}
+              {Array.from(
+                {
+                  length: Math.max(
+                    ...players.map((p) => p.roundHistory?.length || 0)
+                  ),
+                },
+                (_, i) => {
+                  const roundIndex =
+                    Math.max(
+                      ...players.map((p) => p.roundHistory?.length || 0)
+                    ) -
+                    1 -
+                    i;
+                  return (
+                    <th
+                      key={i}
+                      className="border px-2 py-1 text-center bg-gray-100 sticky top-0"
                     >
-                      OK
-                    </button>
-                  ) : (
-                    <>
-                      <button
-                        className="text-blue-600 mr-2"
-                        onClick={() => startEdit(player)}
-                      >
-                        Modifier
-                      </button>
-                      <button
-                        className="text-red-600"
-                        onClick={() => deletePlayer(player.id)}
-                      >
-                        Supprimer
-                      </button>
-                    </>
-                  )}
-                </td>
+                      Round {roundIndex + 1}
+                    </th>
+                  );
+                }
               )}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {players.map((player) => (
+              <tr key={player.id}>
+                {/* Prénom fixe */}
+                <td className="border px-2 py-1 sticky left-0 bg-white z-10">
+                  {admin && editingPlayerId === player.id ? (
+                    <input
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                    />
+                  ) : (
+                    player.name
+                  )}
+                </td>
+
+                <td className="border px-2 py-1 text-center">
+                  {admin && editingPlayerId === player.id ? (
+                    <input
+                      type="number"
+                      value={editWins}
+                      onChange={(e) => setEditWins(Number(e.target.value))}
+                    />
+                  ) : (
+                    player.wins
+                  )}
+                </td>
+
+                <td className="border px-2 py-1 text-center">
+                  {player.restCount || 0}
+                </td>
+
+                <td className="border px-2 py-1 text-center">
+                  {[...player.pastPartners]
+                    .map((partnerId) => {
+                      const name = getName(players, partnerId);
+                      const count = player.partnersHistory?.[partnerId] || 1;
+                      return count > 1 ? `${name} (x${count})` : name;
+                    })
+                    .join(" ; ")}
+                </td>
+
+                {admin && (
+                  <td className="border px-2 py-1 text-center">
+                    {editingPlayerId === player.id ? (
+                      <button
+                        className="text-green-600"
+                        onClick={() => confirmEdit(player.id)}
+                      >
+                        OK
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          className="text-blue-600 mr-2"
+                          onClick={() => startEdit(player)}
+                        >
+                          Modifier
+                        </button>
+                        <button
+                          className="text-red-600"
+                          onClick={() => deletePlayer(player.id)}
+                        >
+                          Supprimer
+                        </button>
+                      </>
+                    )}
+                  </td>
+                )}
+
+                {/* 🆕 Colonnes rounds */}
+                {Array.from(
+                  {
+                    length: Math.max(
+                      ...players.map((p) => p.roundHistory?.length || 0)
+                    ),
+                  },
+                  (_, i) => {
+                    const roundIndex =
+                      Math.max(
+                        ...players.map((p) => p.roundHistory?.length || 0)
+                      ) -
+                      1 -
+                      i;
+                    const round = player.roundHistory?.[roundIndex];
+
+                    if (!round) {
+                      return (
+                        <td
+                          key={i}
+                          className="border px-2 py-1 text-center text-gray-300"
+                        >
+                          –
+                        </td>
+                      );
+                    }
+
+                    if (round.result === "rest") {
+                      return (
+                        <td
+                          key={i}
+                          className="border px-2 py-1 text-center italic text-gray-500 bg-gray-100 whitespace-nowrap"
+                        >
+                          Repos 💤
+                        </td>
+                      );
+                    }
+
+                    const opponentsNames = (round.opponents || []).join(" & ");
+
+                    return (
+                      <td
+                        key={i}
+                        className={`border px-2 py-1 text-center whitespace-nowrap ${
+                          round.won ? "bg-green-100" : "bg-red-100"
+                        }`}
+                      >
+                        <div className="flex flex-row items-center gap-1 whitespace-nowrap">
+                          <span className="text-gray-600">
+                            Terrain {round.terrain ?? "?"}
+                          </span>
+                          <span className="text-blue-700">
+                            👥 {round.partner}
+                          </span>
+                          <span className="text-red-700">
+                            ⚔️ {opponentsNames || "?"}
+                          </span>
+                          <span className="font-semibold text-gray-700 text-xl ml-auto">
+                            {round.won ? "🏆" : "☠️"}
+                          </span>
+                        </div>
+                      </td>
+                    );
+                  }
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
       <div className="bg-neutral-100 p-5 mt-5">
         <div className="flex mb-3 text-xl align-baseline">
           <div className="font-bold mr-2">Round {roundCount} -</div>
@@ -331,7 +443,7 @@ export default function BadmintonMatchmaker() {
                 // Disparait une fois que le matchmaking est validé
                 <>
                   <div className="text-amber-500">
-                    Round en attente de validation
+                    Round généré, en attente de validation
                   </div>
                 </>
               )}
@@ -343,17 +455,13 @@ export default function BadmintonMatchmaker() {
             Actions disponibles :{" "}
           </div>
           {
-            /* BOUTON Générer le prochain round : uniquement une fois le round actuel terminé ! */
+            /* BOUTON Générer le prochain round : uniquement quand des équipes ont été générés et que le round actuel est terminé ! */
+            matchResults.matches.length !== 0 &&
             matchResults.matches.every((m) => m.winner !== null) ? (
               <button
                 className="cursor-pointer mt-2 px-3 py-2 bg-amber-500 text-white rounded opacity-100"
                 onClick={() => {
-                  // Incrémenter le compteur de round
-                  setRoundCount((r) => r + 1);
-                  // Générer de nouvelles équipes
-                  runMatchmaking();
-                  setMatchmakingGenerated(true);
-                  setMatchmakingValidated(false);
+                  endRoundAndStartNext();
                 }}
               >
                 Générer le round {roundCount + 1}
@@ -363,30 +471,23 @@ export default function BadmintonMatchmaker() {
                 Clique sur les gagnant·e·s pour noter le score
               </div>
             ) : (
-              <>
-                <button className="cursor-not-allowed mt-2 px-3 py-2 bg-amber-400 text-white rounded opacity-70">
-                  Round généré
-                </button>
-                <button
-                  className={`mt-2 px-3 py-2 ml-3 bg-green-600 rounded ${
-                    matchmakingValidated
-                      ? "opacity-60 text-white cursor-not-allowed"
-                      : "opacity-100 text-white cursor-pointer"
-                  }`}
-                  disabled={matchmakingValidated}
-                  onClick={() => {
-                    // ✅ Incrémenter le compteur de repos pour les joueurs au repos
-                    const updatedPlayers = validateMatchmaking(
-                      players,
-                      matchResults
-                    );
-                    setPlayers(updatedPlayers);
-                    setMatchmakingValidated(true);
-                  }}
-                >
-                  Valider le matchmaking et commencer les matchs
-                </button>
-              </>
+              matchResults.matches.length !== 0 && (
+                <>
+                  <button
+                    className={`mt-2 px-3 py-2 ml-3 bg-green-600 rounded ${
+                      matchmakingValidated
+                        ? "opacity-60 text-white cursor-not-allowed"
+                        : "opacity-100 text-white cursor-pointer"
+                    }`}
+                    disabled={matchmakingValidated}
+                    onClick={() => {
+                      setMatchmakingValidated(true);
+                    }}
+                  >
+                    Valider et commencer les matchs
+                  </button>
+                </>
+              )
             )
           }
         </div>
