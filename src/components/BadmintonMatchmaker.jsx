@@ -26,17 +26,7 @@ export default function BadmintonMatchmaker() {
   });
 
   function createInitialPlayers() {
-    const initialState = [
-      generatePlayerByName("j1"),
-      generatePlayerByName("j2"),
-      generatePlayerByName("j3"),
-      generatePlayerByName("j4"),
-      generatePlayerByName("j5"),
-      generatePlayerByName("j6"),
-      generatePlayerByName("j7"),
-      generatePlayerByName("j8"),
-      generatePlayerByName("j9"),
-    ];
+    const initialState = [];
     return initialState;
   }
 
@@ -221,32 +211,57 @@ export default function BadmintonMatchmaker() {
       />
 
       <h2 className="text-xl font-bold mb-3">Liste des participant·e·s </h2>
+      <div className="w-full flex items-baseline">
+        <div className="relative w-full max-w-sm mr-5">
+          <input
+            type="text"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && newName.trim()) addPlayer();
+            }}
+            placeholder="Ajouter un prénom"
+            className="border rounded-lg w-full py-2 px-3 pr-10"
+          />
 
-      <input
-        className="border p-1 rounded mr-2"
-        placeholder="Ajouter un prénom..."
-        value={newName}
-        onChange={(e) => setNewName(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && addPlayer()}
-      />
+          {/* Bouton + intégré dans l'input */}
+          <button
+            onClick={addPlayer}
+            disabled={!newName.trim()}
+            className={`
+      absolute right-1 top-1/2 -translate-y-1/2 
+      p-1.5 rounded-md 
+      transition 
+      ${
+        newName.trim()
+          ? "bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+      }
+    `}
+          >
+            <span className="text-xl leading-none">+</span>
+          </button>
+        </div>
 
-      <button
-        className={`mt-4 px-3 py-2 bg-orange-600 text-white rounded ${
-          matchmakingValidated
-            ? "opacity-60 cursor-not-allowed"
-            : "opacity-100 cursor-pointer"
-        }`}
-        onClick={() => {
-          runMatchmaking();
-          setMatchmakingGenerated(true);
-          setMatchmakingValidated(false); // reset validation si on regénère
-        }}
-        disabled={matchmakingValidated}
-      >
-        {matchResults.matches.length !== 0
-          ? "Regénérer les matchs (en cas d'ajout de joueur·euse·s)"
-          : "Générer les matchs"}
-      </button>
+        <button
+          className={`mt-4 px-3 py-2 bg-orange-600 text-white rounded ${
+            matchmakingValidated
+              ? "opacity-60 cursor-not-allowed"
+              : "opacity-100 cursor-pointer"
+          }`}
+          onClick={() => {
+            runMatchmaking();
+            setMatchmakingGenerated(true);
+            setMatchmakingValidated(false); // reset validation si on regénère
+          }}
+          disabled={matchmakingValidated}
+        >
+          {matchResults.matches.length !== 0
+            ? "Regénérer les matchs (en cas d'ajout de joueur·euse·s)"
+            : "Générer les matchs"}
+        </button>
+      </div>
+
       <div className="overflow-x-auto overflow-y-auto max-h-[80vh] relative scrollbar-thick scrollbar-thumb-gray-400 scrollbar-track-gray-200">
         <table className="mt-3 table-auto border-collapse border w-full min-w-[900px]">
           <thead className="bg-gray-100 border-2 border-black sticky top-0 z-30">
@@ -258,12 +273,7 @@ export default function BadmintonMatchmaker() {
               <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
                 Victoires
               </th>
-              <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
-                Nb Repos
-              </th>
-              <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
-                Partenaires précédents
-              </th>
+
               {admin && (
                 <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
                   Actions
@@ -295,6 +305,13 @@ export default function BadmintonMatchmaker() {
                   );
                 }
               )}
+
+              <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
+                Nb Repos
+              </th>
+              <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
+                Partenaires précédents
+              </th>
             </tr>
           </thead>
 
@@ -314,19 +331,6 @@ export default function BadmintonMatchmaker() {
                 </td>
 
                 <td className="border px-2 py-1 text-center">{player.wins}</td>
-                <td className="border px-2 py-1 text-center">
-                  {player.restCount || 0}
-                </td>
-
-                <td className="border px-2 py-1 text-center">
-                  {[...player.pastPartners]
-                    .map((partnerId) => {
-                      const name = getName(players, partnerId);
-                      const count = player.partnersHistory?.[partnerId] || 1;
-                      return count > 1 ? `${name} (x${count})` : name;
-                    })
-                    .join(" ; ")}
-                </td>
 
                 {admin && (
                   <td className="border px-2 py-1 text-center">
@@ -424,6 +428,21 @@ export default function BadmintonMatchmaker() {
                     );
                   }
                 )}
+                {/* Colonne Nb repos */}
+                <td className="border px-2 py-1 text-center">
+                  {player.restCount || 0}
+                </td>
+
+                {/* Colonne partenaires précédents */}
+                <td className="border px-2 py-1 text-center whitespace-nowrap">
+                  {[...player.pastPartners]
+                    .map((partnerId) => {
+                      const name = getName(players, partnerId);
+                      const count = player.partnersHistory?.[partnerId] || 1;
+                      return count > 1 ? `${name} (x${count})` : name;
+                    })
+                    .join(" ; ")}
+                </td>
               </tr>
             ))}
           </tbody>
