@@ -1,6 +1,6 @@
 // components/BadmintonMatchmaker.jsx
 import { useState, useEffect } from "react";
-import { generateMatches } from "../utils/matchmaking";
+import { generateMatches, validateMatchmaking } from "../utils/matchmaking";
 
 function getName(players, id) {
   const p = players.find((player) => player.id === id);
@@ -376,19 +376,11 @@ export default function BadmintonMatchmaker() {
                   disabled={matchmakingValidated}
                   onClick={() => {
                     // ✅ Incrémenter le compteur de repos pour les joueurs au repos
-                    const restingIds = new Set(
-                      matchResults.resting.map((p) => p.id)
+                    const updatedPlayers = validateMatchmaking(
+                      players,
+                      matchResults
                     );
-                    setPlayers((prev) =>
-                      prev.map((p) => ({
-                        ...p,
-                        restedLastRound: restingIds.has(p.id),
-                        restCount: restingIds.has(p.id)
-                          ? (p.restCount || 0) + 1
-                          : p.restCount || 0,
-                      }))
-                    );
-
+                    setPlayers(updatedPlayers);
                     setMatchmakingValidated(true);
                   }}
                 >

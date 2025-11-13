@@ -1,12 +1,24 @@
-// utils/matchmaking.js
-
+// ✅ Fonction principale : génération des matchs
 export function generateMatches(players, nbCourts = 7) {
   const maxActivePlayers = nbCourts * 4;
-  const sortedPlayers = [...players].sort((a, b) => a.wins - b.wins);
 
-  let activeCandidates = sortedPlayers.slice(0, maxActivePlayers);
-  let restingPlayers = sortedPlayers.slice(maxActivePlayers);
+  // 1️⃣ Les joueurs qui étaient au repos doivent jouer ce tour
+  const mustPlay = players.filter((p) => p.restedLastRound);
+  const others = players.filter((p) => !p.restedLastRound);
 
+  // 2️⃣ Tri des autres : priorise ceux qui ont eu le plus de repos et le moins de victoires
+  others.sort((a, b) => {
+    if (a.restCount !== b.restCount) return b.restCount - a.restCount;
+    return a.wins - b.wins;
+  });
+
+  // 3️⃣ Sélection des joueurs actifs
+  let activeCandidates = [...mustPlay, ...others].slice(0, maxActivePlayers);
+  let restingPlayers = [...players].filter(
+    (p) => !activeCandidates.includes(p)
+  );
+
+  // 4️⃣ Ajustement si le nombre de joueurs n'est pas multiple de 4
   const remainder = activeCandidates.length % 4;
   if (remainder !== 0) {
     const surplus = activeCandidates.slice(-remainder);
@@ -17,51 +29,34 @@ export function generateMatches(players, nbCourts = 7) {
     restingPlayers = [...restingPlayers, ...surplus];
   }
 
-  const forcedReturnees = restingPlayers.filter(
-    (p) => p.restedLastRound === true
-  );
-  for (const returningPlayer of forcedReturnees) {
-    const candidateToSit = activeCandidates.find(
-      (p) => p.restedLastRound === false
-    );
-    if (candidateToSit) {
-      activeCandidates = activeCandidates.filter(
-        (p) => p.id !== candidateToSit.id
-      );
-      restingPlayers = restingPlayers.filter(
-        (p) => p.id !== returningPlayer.id
-      );
-
-      activeCandidates.push(returningPlayer);
-      restingPlayers.push(candidateToSit);
-    }
-  }
-
-  restingPlayers = restingPlayers.map((p) => ({ ...p, restedLastRound: true }));
-  activeCandidates = activeCandidates.map((p) => ({
-    ...p,
-    restedLastRound: false,
-  }));
-
-  const matches = [];
-
+  // 5️⃣ Fonction de coût pour évaluer la compatibilité des paires
   function matchCost(a, b) {
-    const PENALTY_PARTNER = 1000;
-    const PENALTY_REPEAT_COUNT = 300;
-    const BONUS_DIVERSITY = 5;
+    // ⚙️ Pondérations ajustées
+    const PENALTY_PARTNER = 1000; // grosse pénalité si déjà partenaires
+    const PENALTY_REPEAT_COUNT = 300; // pénalité additionnelle par répétition
+    const BONUS_DIVERSITY = 5; // petite réduction du coût si diversité
 
     let cost = 0;
 
+    // 1) Très forte pénalité si les deux ont déjà été partenaires
     if (a.pastPartners?.has(b.id) || b.pastPartners?.has(a.id)) {
       const countA = a.partnersHistory?.[b.id] || 0;
       const countB = b.partnersHistory?.[a.id] || 0;
+      // plus ils se sont rencontrés souvent, plus la pénalité augmente
       cost += PENALTY_PARTNER + (countA + countB) * PENALTY_REPEAT_COUNT;
     }
 
+    // 2) Bonus pour la diversité : plus les joueurs ont eu de partenaires différents,
+    //    moins on les pénalise (on soustrait un petit montant).
+    //    Ici BONUS_DIVERSITY * (divA + divB) réduit le coût (donc rend la paire plus désirable)
     const diversityA = a.pastPartners?.size ?? 0;
     const diversityB = b.pastPartners?.size ?? 0;
     cost -= (diversityA + diversityB) * BONUS_DIVERSITY;
 
+    // (optionnel) très léger tie-breaker pour stabilité
+    cost += (Math.random() - 0.5) * 1e-6;
+
+    // debug log (tu peux commenter si trop verbeux)
     console.log(
       `Compatibilité ${a.name}-${b.name} : coût=${cost.toFixed(
         2
@@ -71,12 +66,14 @@ export function generateMatches(players, nbCourts = 7) {
     return cost;
   }
 
+  // 6️⃣ Création des matchs optimisés
+  const matches = [];
+
   for (let i = 0; i < activeCandidates.length; i += 4) {
     const group = activeCandidates.slice(i, i + 4);
     if (group.length < 4) break;
 
-    // Les 3 configurations possibles pour 4 joueurs
-    const allConfigs = [
+    const configs = [
       [
         [0, 1],
         [2, 3],
@@ -94,29 +91,32 @@ export function generateMatches(players, nbCourts = 7) {
     let bestConfig = null;
     let bestCost = Infinity;
 
-    for (const config of allConfigs) {
-      const [[i1, i2], [j1, j2]] = config;
+    for (const cfg of configs) {
+      const [[a1, a2], [b1, b2]] = cfg;
       const cost =
-        matchCost(group[i1], group[i2]) + matchCost(group[j1], group[j2]);
-
+        matchCost(group[a1], group[a2]) + matchCost(group[b1], group[b2]);
       if (cost < bestCost) {
         bestCost = cost;
-        bestConfig = config;
+        bestConfig = cfg;
       }
     }
 
     const teamA = [group[bestConfig[0][0]], group[bestConfig[0][1]]];
     const teamB = [group[bestConfig[1][0]], group[bestConfig[1][1]]];
-
-    console.log(
-      `Match généré : ${teamA[0].name} & ${teamA[1].name} vs ${teamB[0].name} & ${teamB[1].name}`
-    );
-
     matches.push({ teamA, teamB });
   }
 
-  return {
-    matches,
-    resting: restingPlayers,
-  };
+  return { matches, resting: restingPlayers };
+}
+
+// ✅ Nouvelle fonction : validation du matchmaking (repos + compteur)
+export function validateMatchmaking(players, matchResults) {
+  const restingIds = new Set(matchResults.resting.map((p) => p.id));
+
+  // On retourne les joueurs mis à jour sans toucher au composant
+  return players.map((p) => ({
+    ...p,
+    restedLastRound: restingIds.has(p.id),
+    restCount: restingIds.has(p.id) ? (p.restCount || 0) + 1 : p.restCount || 0,
+  }));
 }
