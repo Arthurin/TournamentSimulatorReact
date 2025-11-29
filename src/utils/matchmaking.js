@@ -3,8 +3,8 @@ export function generateMatches(players, nbCourts = 7) {
   const maxActivePlayers = nbCourts * 4;
 
   // 1️⃣ Les joueurs qui étaient au repos doivent jouer ce tour
-  const mustPlay = players.filter((p) => p.restedLastRound);
-  const others = players.filter((p) => !p.restedLastRound);
+  const mustPlay = players.filter((p) => p.restedLastRound || p.games === 0);
+  const others = players.filter((p) => !mustPlay.includes(p));
 
   // 2️⃣ Tri des autres : priorise ceux qui ont eu le plus de repos et le moins de victoires
   others.sort((a, b) => {
@@ -20,6 +20,7 @@ export function generateMatches(players, nbCourts = 7) {
 
   // 4️⃣ Ajustement si le nombre de joueurs n'est pas multiple de 4
   const remainder = activeCandidates.length % 4;
+  console.log("remainder", remainder, "et candidats", activeCandidates);
   if (remainder !== 0) {
     const surplus = activeCandidates.slice(-remainder);
     activeCandidates = activeCandidates.slice(
@@ -28,6 +29,13 @@ export function generateMatches(players, nbCourts = 7) {
     );
     restingPlayers = [...restingPlayers, ...surplus];
   }
+
+  console.log(
+    "matchmaking.js selection des joueurs actifs. Candidats",
+    activeCandidates,
+    "Joueurs au repos d'après le filtre :",
+    restingPlayers
+  );
 
   // 🆕 4.5️⃣ Tri préalable des joueurs actifs par nombre de victoires
   // Cela assure que les blocs de 4 joueurs ont des niveaux proches
@@ -38,7 +46,7 @@ export function generateMatches(players, nbCourts = 7) {
     const PENALTY_PARTNER = 300; // secondaire
     const PENALTY_REPEAT_COUNT = 100;
     const BONUS_DIVERSITY = 3;
-    const PENALTY_VICTORY_GAP = 1000; // 🔥 priorité forte
+    const PENALTY_VICTORY_GAP = 30; // 🔥 priorité forte
 
     let cost = 0;
 
@@ -51,7 +59,7 @@ export function generateMatches(players, nbCourts = 7) {
 
     // ⚙️ Pénalité quadratique sur l'écart de victoires
     const winGap = Math.abs((a.wins || 0) - (b.wins || 0));
-    cost += winGap ** 2 * PENALTY_VICTORY_GAP;
+    cost += winGap * PENALTY_VICTORY_GAP;
 
     // 🌈 Légère récompense pour diversité
     const diversityA = a.pastPartners?.size ?? 0;
@@ -68,7 +76,7 @@ export function generateMatches(players, nbCourts = 7) {
   function groupCost(group) {
     const wins = group.map((p) => p.wins || 0);
     const gap = Math.max(...wins) - Math.min(...wins);
-    return gap ** 2 * 10000; // énorme pénalité si écart trop grand
+    return gap * 200; // énorme pénalité si écart trop grand
   }
 
   // 6️⃣ Création des matchs optimisés (équipes équilibrées)
@@ -110,14 +118,33 @@ export function generateMatches(players, nbCourts = 7) {
 
     const teamA = [group[bestConfig[0][0]], group[bestConfig[0][1]]];
     const teamB = [group[bestConfig[1][0]], group[bestConfig[1][1]]];
+    console.log(
+      group[bestConfig[0][0]].name,
+      group[bestConfig[0][1]].name,
+      "vs",
+      group[bestConfig[1][0]].name,
+      group[bestConfig[1][1]].name,
+      "with cost",
+      bestCost
+    );
     matches.push({ teamA, teamB });
   }
-
+  console.log(
+    "Matchs générés :",
+    matches[0].teamA,
+    matches[0].teamB,
+    "Joueurs au repos :",
+    restingPlayers
+  );
   return { matches, resting: restingPlayers };
 }
 
 // ✅ Nouvelle fonction : validation du matchmaking (repos + compteur)
 export function validateRound(players, matchResults) {
+  console.log(
+    "résultats des matchs avant validation des joueurs:",
+    matchResults
+  );
   const restingIds = new Set(matchResults.resting.map((p) => p.id));
 
   // On retourne les joueurs mis à jour sans toucher au composant

@@ -82,6 +82,10 @@ export default function BadmintonMatchmaker() {
   function endRoundAndStartNext() {
     // ✅ Incrémenter le compteur de repos pour les joueurs au repos
     const updatedPlayers = validateRound(players, matchResults);
+    console.log(
+      "résultats des matchs après validation des joueurs:",
+      updatedPlayers
+    );
     setPlayers(updatedPlayers);
 
     // Incrémenter le compteur de round
@@ -94,6 +98,7 @@ export default function BadmintonMatchmaker() {
 
   function runMatchmaking() {
     const { matches, resting } = generateMatches(players, 7);
+    console.log("Matches generated:", matches, resting);
 
     setMatchResults({
       matches: matches.map((m) => ({ ...m, winner: null })), // ajout
