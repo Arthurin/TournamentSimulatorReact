@@ -1,9 +1,10 @@
 // ✅ Fonction principale : génération des matchs
 export function generateMatches(players, nbCourts = 7) {
+  console.log("generateMatches", players, "nbCourts", nbCourts);
   const maxActivePlayers = nbCourts * 4;
 
   // 1️⃣ Les joueurs qui étaient au repos doivent jouer ce tour
-  const mustPlay = players.filter((p) => p.restedLastRound || p.games === 0);
+  const mustPlay = players.filter((p) => p.restedLastRound);
   const others = players.filter((p) => !mustPlay.includes(p));
 
   // 2️⃣ Tri des autres : priorise ceux qui ont eu le plus de repos et le moins de victoires
@@ -140,7 +141,7 @@ export function generateMatches(players, nbCourts = 7) {
 }
 
 // ✅ Nouvelle fonction : validation du matchmaking (repos + compteur)
-export function validateRound(players, matchResults) {
+export function validateRound(players, matchResults, roundNumber) {
   console.log(
     "résultats des matchs avant validation des joueurs:",
     matchResults
@@ -157,6 +158,10 @@ export function validateRound(players, matchResults) {
 
     // 🔹 Construire une entrée d’historique pour ce round
     let roundEntry = null;
+    let didWin = false;
+    const pastPartners = new Set(p.pastPartners || []);
+    const partnersHistory = { ...(p.partnersHistory || {}) };
+
     if (playerMatch) {
       const terrain = matchResults.matches.indexOf(playerMatch) + 1; // le numéro de terrain
       const isTeamA = playerMatch.teamA.some((t) => t.id === p.id);
@@ -170,7 +175,7 @@ export function validateRound(players, matchResults) {
 
       const winnerTeam = playerMatch.winner; // peut être 'A', 'B', ou null
 
-      const didWin =
+      didWin =
         winnerTeam &&
         ((winnerTeam === "A" && isTeamA) || (winnerTeam === "B" && !isTeamA));
 
@@ -181,6 +186,14 @@ export function validateRound(players, matchResults) {
         won: !!didWin,
         result: winnerTeam ? (didWin ? "win" : "loss") : "pending",
       };
+
+      // Ajoute le partenaire
+      if (partner?.id != null) {
+        pastPartners.add(partner.id);
+        partnersHistory[partner.id] = partnersHistory[partner.id]
+          ? partnersHistory[partner.id] + 1
+          : 1;
+      }
     } else if (restingIds.has(p.id)) {
       // 🔹 S'il était au repos
       roundEntry = {
@@ -192,14 +205,22 @@ export function validateRound(players, matchResults) {
       };
     }
 
+    const updatedHistory = [...(p.roundHistory || [])];
+
+    // On commence avec le round 1 qui est à l'entrée 0
+    updatedHistory[roundNumber - 1] = roundEntry;
+
     // 🔹 Retourner le joueur mis à jour
     return {
       ...p,
+      pastPartners,
+      partnersHistory,
+      wins: didWin ? p.wins + 1 : p.wins,
       restedLastRound: restingIds.has(p.id),
       restCount: restingIds.has(p.id)
         ? (p.restCount || 0) + 1
         : p.restCount || 0,
-      roundHistory: [...(p.roundHistory || []), roundEntry].filter(Boolean),
+      roundHistory: updatedHistory,
     };
   });
 }

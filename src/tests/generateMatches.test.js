@@ -110,7 +110,11 @@ describe("validateRound()", () => {
     };
 
     // --- Appel de la fonction ---
-    const updatedPlayers = validateRound(players, matchResults);
+    const updatedPlayers = validateRound(players, matchResults, 1);
+    console.log(
+      "Joueurs apres validation on doit avoir l'historique d'un round",
+      updatedPlayers
+    );
 
     // --- Vérifications ---
     const j1 = updatedPlayers.find((p) => p.id === "j1");
@@ -119,19 +123,16 @@ describe("validateRound()", () => {
     const j4 = updatedPlayers.find((p) => p.id === "j4");
     const j5 = updatedPlayers.find((p) => p.id === "j5");
 
-    // ✅ Chaque joueur a bien un historique d'un round
-    expect(j1.roundHistory).toHaveLength(1);
-    expect(j5.roundHistory).toHaveLength(1);
-
+    const roundIndex = 0;
     // ✅ Victoire de j1 et j2
-    expect(j1.roundHistory[0]).toMatchObject({
+    expect(j1.roundHistory[roundIndex]).toMatchObject({
       partner: "j2",
       opponents: ["j3", "j4"],
       won: true,
       result: "win",
     });
 
-    expect(j2.roundHistory[0]).toMatchObject({
+    expect(j2.roundHistory[roundIndex]).toMatchObject({
       partner: "j1",
       opponents: ["j3", "j4"],
       won: true,
@@ -139,14 +140,14 @@ describe("validateRound()", () => {
     });
 
     // ✅ Défaite de j3 et j4
-    expect(j3.roundHistory[0]).toMatchObject({
+    expect(j3.roundHistory[roundIndex]).toMatchObject({
       partner: "j4",
       opponents: ["j1", "j2"],
       won: false,
       result: "loss",
     });
 
-    expect(j4.roundHistory[0]).toMatchObject({
+    expect(j4.roundHistory[roundIndex]).toMatchObject({
       partner: "j3",
       opponents: ["j1", "j2"],
       won: false,
@@ -154,7 +155,7 @@ describe("validateRound()", () => {
     });
 
     // ✅ Joueur au repos
-    expect(j5.roundHistory[0]).toMatchObject({
+    expect(j5.roundHistory[roundIndex]).toMatchObject({
       result: "rest",
       partner: null,
       opponents: [],

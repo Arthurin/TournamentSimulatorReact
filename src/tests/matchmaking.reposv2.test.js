@@ -23,7 +23,7 @@ describe("Matchmaking round complet", () => {
     expect(resting.length).toBe(1); // 1 joueur restant (j9)
 
     // Validation du matchmaking (incrément des repos)
-    const updatedPlayers = validateRound(players, { matches, resting });
+    const updatedPlayers = validateRound(players, { matches, resting },1);
 
     // Vérification : le joueur restant (j9) a bien son restCount incrémenté
     const j9 = updatedPlayers.find((p) => p.id === 9);
@@ -56,7 +56,7 @@ describe("validateRound", () => {
       ],
     };
 
-    const updatedPlayers = validateRound(players, matchResults);
+    const updatedPlayers = validateRound(players, matchResults,1);
 
     // Vérification des joueurs au repos
     const j1 = updatedPlayers.find((p) => p.id === 1);
@@ -96,7 +96,7 @@ describe("Simulation multi-rounds avec logs détaillés", () => {
       currentPlayers = validateRound(currentPlayers, {
         matches,
         resting,
-      });
+      }, round);
 
       // Affichage détaillé comme dans tes logs
       const restCounts = currentPlayers.map((p) => p.restCount);
@@ -149,7 +149,7 @@ describe("simulate 4 rounds - j9 resting imbalance", () => {
       }
 
       // ⚙️ Applique la validation du round
-      players = validateRound(players, { resting, matches });
+      players = validateRound(players, { resting, matches },5);
 
       console.log(
         `Round ${round}: repos =`,

@@ -46,7 +46,7 @@ describe("matchmaking - équilibre des victoires entre équipiers", () => {
       }
 
       // ✅ Validation du round
-      players = validateRound(players, { matches, resting });
+      players = validateRound(players, { matches, resting },13);
 
       // Log pour debug
       console.log(

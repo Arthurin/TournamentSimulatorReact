@@ -55,7 +55,7 @@ export default function BadmintonMatchmaker() {
       name: playerName,
       wins: 0,
       pastPartners: new Set(),
-      lastRest: false,
+      restedLastRound: true,
     };
     return newPlayer;
   }
@@ -81,23 +81,24 @@ export default function BadmintonMatchmaker() {
 
   function endRoundAndStartNext() {
     // ✅ Incrémenter le compteur de repos pour les joueurs au repos
-    const updatedPlayers = validateRound(players, matchResults);
+    const updatedPlayers = validateRound(players, matchResults, roundCount);
     console.log(
-      "résultats des matchs après validation des joueurs:",
+      "Résultats des matchs après validation des joueurs:",
       updatedPlayers
     );
-    setPlayers(updatedPlayers);
+    setPlayers(() => [...updatedPlayers]); //attention à ne pas mettre setPlayers(updatedPlayers) qui ne sauvegarderait pas le tableau.
 
     // Incrémenter le compteur de round
     setRoundCount((r) => r + 1);
     // Générer de nouvelles équipes
-    runMatchmaking();
+    runMatchmaking(updatedPlayers);
     setMatchmakingGenerated(true);
     setMatchmakingValidated(false);
   }
 
-  function runMatchmaking() {
-    const { matches, resting } = generateMatches(players, 7);
+  function runMatchmaking(currentPlayers) {
+    console.log("** Lancement du matchmaking", currentPlayers);
+    const { matches, resting } = generateMatches(currentPlayers, 7);
     console.log("Matches generated:", matches, resting);
 
     setMatchResults({
@@ -110,49 +111,7 @@ export default function BadmintonMatchmaker() {
     const winningTeam = winner === "A" ? match.teamA : match.teamB;
     const losingTeam = winner === "A" ? match.teamB : match.teamA;
 
-    // 1️⃣ Mise à jour des victoires
-    setPlayers((prev) =>
-      prev.map((p) => {
-        const isWinner = winningTeam.some((w) => w.id === p.id);
-        if (isWinner) return { ...p, wins: (p.wins || 0) + 1 };
-        return p;
-      })
-    );
-
-    // 2️⃣ Mise à jour partenaires / partenaires history
-    setPlayers((prev) => {
-      const updated = new Map(
-        prev.map((p) => [
-          p.id,
-          {
-            ...p,
-            pastPartners: new Set(p.pastPartners),
-            partnersHistory: { ...p.partnersHistory }, // ajout du compteur
-          },
-        ])
-      );
-
-      const addHistory = (playerA, playerB) => {
-        // pastPartners
-        updated.get(playerA.id).pastPartners.add(playerB.id);
-        updated.get(playerB.id).pastPartners.add(playerA.id);
-
-        // partnersHistory
-        if (!updated.get(playerA.id).partnersHistory[playerB.id])
-          updated.get(playerA.id).partnersHistory[playerB.id] = 0;
-        updated.get(playerA.id).partnersHistory[playerB.id] += 1;
-
-        if (!updated.get(playerB.id).partnersHistory[playerA.id])
-          updated.get(playerB.id).partnersHistory[playerA.id] = 0;
-        updated.get(playerB.id).partnersHistory[playerA.id] += 1;
-      };
-
-      // Pour chaque équipe, ajouter les paires
-      addHistory(winningTeam[0], winningTeam[1]);
-      addHistory(losingTeam[0], losingTeam[1]);
-
-      return Array.from(updated.values());
-    });
+    // 1️⃣ Mise à jour des victoires -> j'utilise maintenant validateMatch
 
     // 3️⃣ Empêche de recliquer sur ce match
     setMatchResults((prev) => ({
@@ -268,7 +227,7 @@ export default function BadmintonMatchmaker() {
               : "opacity-100 cursor-pointer"
           }`}
           onClick={() => {
-            runMatchmaking();
+            runMatchmaking(players);
             setMatchmakingGenerated(true);
             setMatchmakingValidated(false); // reset validation si on regénère
           }}
