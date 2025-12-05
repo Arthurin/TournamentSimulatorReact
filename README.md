@@ -7,6 +7,8 @@ En fonction de l'état du round on aura : un bouton pour valider le matchmaking 
 Ensuite quand le round est en cours on peut cliquer sur les binomes pour indiquer qui a gagné ;
 Et enfin, quand tous les résultats sont obtenus, on peut cliquer sur le bouton pour passer au round suivant.
 
+Fonctionnalité cachée : il y a un bouton invisible tout en haut à droite qui permet d'activer le mode "admin" : supprimer un joueur, modifier son prénom.
+
 Pour ajouter plusieurs joueurs d'un coup, il est possible d'utiliser le séparateur ";". Par exemple :
 j1 ; j2 ; j3 ; j4 ; j5 ; j6 ; j7 ; j8 ; j9 ; j10 ; j11 ; j12 ; j13 ; j14 ; j15 ; j16 ; j17 ; j18 ; j19 ; j20 ; j21 ; j22 ; j23 ; j24 ; j25
 
