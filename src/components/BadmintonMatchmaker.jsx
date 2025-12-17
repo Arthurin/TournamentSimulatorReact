@@ -1,6 +1,7 @@
 // components/BadmintonMatchmaker.jsx
 import { useState, useEffect } from "react";
 import { generateMatches, validateRound } from "../utils/matchmaking";
+import FullScreenMatches from "./FullScreenMatches";
 
 function getName(players, id) {
   const p = players.find((player) => player.id === id);
@@ -19,6 +20,8 @@ export default function BadmintonMatchmaker() {
   const [editingPlayerId, setEditingPlayerId] = useState(null);
   const [editName, setEditName] = useState("");
   const [editWins, setEditWins] = useState(0);
+
+  const [showFullScreenMatches, setShowFullScreenMatches] = useState(false);
 
   const [matchResults, setMatchResults] = useState({
     matches: [],
@@ -181,12 +184,14 @@ export default function BadmintonMatchmaker() {
 
   return (
     <div className="p-4">
+      {/* HEADER */}
       {/* BOUTON SECRET POUR ADMIN */}
       <button
         className="absolute top-0 right-0 w-10 h-10 bg-white cursor-pointer"
         onClick={() => setAdmin((a) => !a)}
       />
 
+      {/* AJOUTER DES PARTICIPANT.E.S */}
       <h2 className="text-xl font-bold mb-3">Liste des participant·e·s </h2>
       <div className="w-full flex items-baseline">
         <div className="relative w-full max-w-sm mr-5">
@@ -239,6 +244,7 @@ export default function BadmintonMatchmaker() {
         </button>
       </div>
 
+      {/* TABLEAU */}
       <div className="overflow-x-auto overflow-y-auto max-h-[80vh] relative scrollbar-thick scrollbar-thumb-gray-400 scrollbar-track-gray-200">
         <table className="mt-3 table-auto border-collapse border w-full min-w-[900px]">
           <thead className="bg-gray-100 border-2 border-black sticky top-0 z-30">
@@ -427,6 +433,7 @@ export default function BadmintonMatchmaker() {
       </div>
 
       <div className="bg-neutral-100 p-5 mt-5">
+        {/* AFFICHAGE ETAT DU ROUND */}
         <div className="flex mb-3 text-xl align-baseline">
           <div className="font-bold mr-2">Round {roundCount} -</div>
 
@@ -449,6 +456,8 @@ export default function BadmintonMatchmaker() {
             </>
           )}
         </div>
+
+        {/* AFFICHAGE ACTIONS DU ROUND */}
         <div className="flex align-baseline items-start">
           <div className="mt-2 px-3 ps-0 py-2 font-bold">
             Actions disponibles :{" "}
@@ -491,7 +500,14 @@ export default function BadmintonMatchmaker() {
           }
         </div>
 
-        {/* AFFICHAGE MATCHS */}
+        <button
+          className="ml-4 px-4 py-2 bg-indigo-600 text-white rounded text-lg"
+          onClick={() => setShowFullScreenMatches(true)}
+        >
+          📺 Affichage grand écran
+        </button>
+
+        {/* AFFICHAGE DES MATCHS avec les REPOS et les TERRAINS */}
         <div className="mt-6">
           <h4 className="mt-3 font-bold mb-2">
             Au repos :
@@ -614,6 +630,15 @@ export default function BadmintonMatchmaker() {
           ))}
         </div>
       </div>
+      {showFullScreenMatches && (
+        <FullScreenMatches
+          matchResults={matchResults}
+          matchmakingValidated={matchmakingValidated}
+          recordMatchResult={recordMatchResult}
+          undoMatchResult={undoMatchResult}
+          onClose={() => setShowFullScreenMatches(false)}
+        />
+      )}
     </div>
   );
 }
