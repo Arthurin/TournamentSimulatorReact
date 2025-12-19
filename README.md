@@ -16,9 +16,8 @@ Testable ici : https://arthurin.github.io/TournamentSimulatorReact/
 
 Idées d'amélioration :
 
-- sauvegarder dans le navigateur les données pour ne pas tout perdre en cas de rafraichissement de la page
-- Amélioration de l'affichage : mettre en plus gros pour que les gens puissent mieux lire leur nom et leur partenaire/terrain sur la TV.
-- Gestion des repos : Est-ce qu'on peut mettre une victoire quand tu es au repos ?
-- Trier le tableau : par ordre de victoire pour voir le classement final
-- Trier par prénom alphabétique pour s'y retrouver plus facilement ?
+- Sauvegarder dans le navigateur les données pour ne pas tout perdre en cas de rafraichissement de la page
 - Permettre de mettre un joueur sur la touche et de le rajouter ensuite ?
+
+Commande de dev :
+Pour publier sur github : npm run deploy
