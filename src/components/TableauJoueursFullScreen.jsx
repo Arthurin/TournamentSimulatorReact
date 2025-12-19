@@ -146,14 +146,17 @@ export default function TableauJoueursFullScreen({
       {/* CONTENU */}
       <div className="flex px-6 gap-6" style={{ height: availableHeight }}>
         {columns.map((col, colIndex) => (
-          <div key={colIndex} className="flex-1 flex flex-col">
+          <div
+            key={colIndex}
+            className="flex-none flex flex-col content-start basis-0 justify-start grow-0 flex-nowrap"
+          >
             {col.map((player) => {
               const status = statusById.get(player.id);
 
               return (
                 <div
                   key={player.id}
-                  className="bg-neutral-800 rounded-xl px-6 flex items-center"
+                  className="bg-neutral-800 rounded-xl margeVerticale border-2 border-white px-6 flex items-center"
                   style={{
                     height: availableHeight / rowsPerColumn,
                     fontSize,
@@ -192,6 +195,15 @@ export default function TableauJoueursFullScreen({
                       {status?.type === "play" && (
                         <>
                           <span
+                            className="text-gray-300 flex items-center gap-1"
+                            style={{
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            🏸 {status.terrain}
+                          </span>
+
+                          <span
                             className="text-green-400 font-semibold"
                             style={{
                               whiteSpace: "nowrap",
@@ -199,15 +211,6 @@ export default function TableauJoueursFullScreen({
                             }}
                           >
                             {status.partner}
-                          </span>
-
-                          <span
-                            className="text-gray-300 flex items-center gap-1"
-                            style={{
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            🏸 {status.terrain}
                           </span>
                         </>
                       )}
