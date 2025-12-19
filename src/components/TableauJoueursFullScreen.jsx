@@ -68,16 +68,16 @@ export default function TableauJoueursFullScreen({
   /* 🔴 CAS LIMITE : écran trop petit */
   if (availableHeight < MIN_AVAILABLE_HEIGHT) {
     return (
-      <div className="fixed inset-0 z-50 bg-neutral-900 text-white flex flex-col items-center justify-center">
+      <div className="fixed inset-0 z-50 bg-neutral-900 text-black flex flex-col items-center justify-center">
         <div className="text-2xl font-bold mb-6 text-center">
           Fenêtre trop petite
         </div>
-        <div className="text-gray-300 text-center mb-10">
+        <div className="text-black text-center mb-10">
           Agrandis la hauteur de l’écran pour afficher le tableau des joueurs.
         </div>
         <button
           onClick={onClose}
-          className="px-6 py-3 bg-red-600 rounded-xl text-xl hover:bg-red-700"
+          className="px-6 py-3 bg-red-300 rounded-xl text-xl hover:bg-red-700"
         >
           Retour
         </button>
@@ -132,12 +132,12 @@ export default function TableauJoueursFullScreen({
   );
 
   return (
-    <div className="fixed inset-0 z-50 bg-neutral-900 text-white">
+    <div className="fixed inset-0 z-50 bg-white text-black">
       {/* HEADER */}
       <div className="absolute top-4 right-4 z-10">
         <button
           onClick={onClose}
-          className="px-6 py-3 bg-red-600 rounded-xl text-xl hover:bg-red-700"
+          className="px-6 py-3 bg-red-300 rounded-xl text-xl hover:bg-red-700"
         >
           Retour
         </button>
@@ -156,7 +156,7 @@ export default function TableauJoueursFullScreen({
               return (
                 <div
                   key={player.id}
-                  className="bg-neutral-800 rounded-xl margeVerticale border-2 border-white px-6 flex items-center"
+                  className="bg-neutral-100 rounded-xl margeVerticale border-2 border-b-black px-6 flex items-center"
                   style={{
                     height: availableHeight / rowsPerColumn,
                     fontSize,
@@ -189,13 +189,13 @@ export default function TableauJoueursFullScreen({
                       }}
                     >
                       {status?.type === "rest" && (
-                        <span className="italic text-gray-300">Repos 💤</span>
+                        <span className="italic text-black">Repos 💤</span>
                       )}
 
                       {status?.type === "play" && (
                         <>
                           <span
-                            className="text-gray-300 flex items-center gap-1"
+                            className="text-black flex items-center gap-1"
                             style={{
                               whiteSpace: "nowrap",
                             }}
@@ -204,7 +204,7 @@ export default function TableauJoueursFullScreen({
                           </span>
 
                           <span
-                            className="text-green-400 font-semibold"
+                            className="text-green-700 font-semibold"
                             style={{
                               whiteSpace: "nowrap",
                               overflow: "visible",
