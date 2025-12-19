@@ -184,6 +184,11 @@ export default function BadmintonMatchmaker() {
     }));
   }
 
+  // 🔽 joueurs triés par nombre de victoires (descendant)
+  const sortedPlayersByWins = [...players].sort(
+    (a, b) => (b.wins || 0) - (a.wins || 0)
+  );
+
   return (
     <>
       <div className="p-4">
@@ -302,7 +307,7 @@ export default function BadmintonMatchmaker() {
             </thead>
 
             <tbody>
-              {players.map((player) => (
+              {sortedPlayersByWins.map((player) => (
                 <tr key={player.id} className="hover:bg-gray-50">
                   {/* Prénom fixe */}
                   <td className="border px-2 py-1 sticky left-0 bg-white z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.2)]">
