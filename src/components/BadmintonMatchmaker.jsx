@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { generateMatches, validateRound } from "../utils/matchmaking";
 import FullScreenMatches from "./FullScreenMatches";
 import TableauJoueursFullScreen from "./TableauJoueursFullScreen";
+import TableauStatsJoueurs from "./TableauStatsJoueurs";
 
 function getName(players, id) {
   const p = players.find((player) => player.id === id);
@@ -24,6 +25,8 @@ export default function BadmintonMatchmaker() {
 
   const [showFullScreenMatches, setShowFullScreenMatches] = useState(false);
   const [showTableauJoueurs, setShowTableauJoueurs] = useState(false);
+  const [showTableauStats, setShowTableauStats] = useState(false);
+  const [showSaisirResultats, setshowSaisirResultats] = useState(false);
 
   const [matchResults, setMatchResults] = useState({
     matches: [],
@@ -336,323 +339,161 @@ export default function BadmintonMatchmaker() {
           </div>
 
           {/* AFFICHAGE DES MATCHS avec les REPOS et les TERRAINS */}
-          <div className="mt-6">
-            <h4 className="mt-3 font-bold mb-2">
-              Au repos :
-              {matchResults.resting.map((p) => (
-                <span
-                  key={p.id}
-                  className="inline-block font-medium px-2 py-1 border rounded mr-1 ml-1"
-                >
-                  {p.name}
-                </span>
-              ))}
-            </h4>
+          <button
+            className="mt-4 px-4 py-2 bg-slate-700 text-white rounded text-lg"
+            onClick={() => setshowSaisirResultats((v) => !v)}
+          >
+            Ancien affichage des matchs
+          </button>
+          {showSaisirResultats && (
+            <div className="mt-6">
+              <h4 className="mt-3 font-bold mb-2">
+                Au repos :
+                {matchResults.resting.map((p) => (
+                  <span
+                    key={p.id}
+                    className="inline-block font-medium px-2 py-1 border rounded mr-1 ml-1"
+                  >
+                    {p.name}
+                  </span>
+                ))}
+              </h4>
 
-            {/* TERRAIN */}
-            {matchResults.matches.map((m, i) => (
-              <div
-                key={i}
-                className={`p-3 mb-2 w-fit border rounded space-y-2`}
-              >
-                <div className="flex justify-between">
-                  <div>
-                    <div className="font-medium">Terrain {i + 1}</div>
+              {/* TERRAIN */}
+              {matchResults.matches.map((m, i) => (
+                <div
+                  key={i}
+                  className={`p-3 mb-2 w-fit border rounded space-y-2`}
+                >
+                  <div className="flex justify-between">
+                    <div>
+                      <div className="font-medium">Terrain {i + 1}</div>
+                    </div>
+                  </div>
+
+                  {/* ✅ matchs et boutons résultat */}
+                  <div className="flex gap-2">
+                    {/* EQUIPE A */}
+                    {matchmakingValidated ? (
+                      /*Affichage du bouton pour saisir les gagnants*/
+                      <button
+                        onClick={() => {
+                          if (m.winner === "A") {
+                            undoMatchResult(m); // annule si on reclique sur le gagnant
+                          } else if (!m.winner) {
+                            recordMatchResult(m, "A"); // enregistre si pas encore de gagnant
+                          }
+                        }}
+                        className={`px-3 py-1 rounded ${
+                          m.winner === "A"
+                            ? "bg-green-500 text-white"
+                            : "bg-blue-600 text-white hover:bg-green-500"
+                        } ${
+                          m.winner && m.winner !== "A"
+                            ? "opacity-60 cursor-not-allowed"
+                            : "cursor-pointer"
+                        }`}
+                      >
+                        {m.teamA.map((p) => (
+                          <div key={p.id}>
+                            {p.name} (wins: {p.wins})
+                          </div>
+                        ))}
+                        {m.winner === null
+                          ? ""
+                          : m.winner === "A"
+                          ? "Victoire"
+                          : " Défaite"}
+                      </button>
+                    ) : (
+                      /*Affichage du texte, on met les boutons que si c'est validé*/
+                      <button
+                        disabled
+                        className="px-3 py-1 bg-blue-600 text-white rounded"
+                      >
+                        {m.teamA.map((p) => (
+                          <div key={p.id}>
+                            {p.name} (wins: {p.wins})
+                          </div>
+                        ))}
+                      </button>
+                    )}
+
+                    <div className="px-2 self-center">VS</div>
+
+                    {/* EQUIPE B */}
+                    {matchmakingValidated ? (
+                      /*Affichage du bouton pour saisir les gagnants*/
+                      <button
+                        onClick={() => {
+                          if (m.winner === "B") {
+                            undoMatchResult(m); // annule si on reclique sur le gagnant
+                          } else if (!m.winner) {
+                            recordMatchResult(m, "B"); // enregistre si pas encore de gagnant
+                          }
+                        }}
+                        className={`px-3 py-1 rounded ${
+                          m.winner === "B"
+                            ? "bg-green-500 text-white"
+                            : "bg-pink-600 text-white hover:bg-green-500"
+                        } ${
+                          m.winner && m.winner !== "B"
+                            ? "opacity-60 cursor-not-allowed"
+                            : "cursor-pointer"
+                        }`}
+                      >
+                        {m.teamB.map((p) => (
+                          <div key={p.id}>
+                            {p.name} (wins: {p.wins})
+                          </div>
+                        ))}
+                        {m.winner === null
+                          ? ""
+                          : m.winner === "B"
+                          ? "Victoire"
+                          : " Défaite"}
+                      </button>
+                    ) : (
+                      /*Affichage du texte, on met les boutons que si c'est validé*/
+                      <button
+                        disabled
+                        className="px-3 py-1 bg-pink-600 text-white rounded"
+                      >
+                        {m.teamB.map((p) => (
+                          <div key={p.id}>
+                            {p.name} (wins: {p.wins})
+                          </div>
+                        ))}
+                      </button>
+                    )}
                   </div>
                 </div>
-
-                {/* ✅ matchs et boutons résultat */}
-                <div className="flex gap-2">
-                  {/* EQUIPE A */}
-                  {matchmakingValidated ? (
-                    /*Affichage du bouton pour saisir les gagnants*/
-                    <button
-                      onClick={() => {
-                        if (m.winner === "A") {
-                          undoMatchResult(m); // annule si on reclique sur le gagnant
-                        } else if (!m.winner) {
-                          recordMatchResult(m, "A"); // enregistre si pas encore de gagnant
-                        }
-                      }}
-                      className={`px-3 py-1 rounded ${
-                        m.winner === "A"
-                          ? "bg-green-500 text-white"
-                          : "bg-blue-600 text-white hover:bg-green-500"
-                      } ${
-                        m.winner && m.winner !== "A"
-                          ? "opacity-60 cursor-not-allowed"
-                          : "cursor-pointer"
-                      }`}
-                    >
-                      {m.teamA.map((p) => (
-                        <div key={p.id}>
-                          {p.name} (wins: {p.wins})
-                        </div>
-                      ))}
-                      {m.winner === null
-                        ? ""
-                        : m.winner === "A"
-                        ? "Victoire"
-                        : " Défaite"}
-                    </button>
-                  ) : (
-                    /*Affichage du texte, on met les boutons que si c'est validé*/
-                    <button
-                      disabled
-                      className="px-3 py-1 bg-blue-600 text-white rounded"
-                    >
-                      {m.teamA.map((p) => (
-                        <div key={p.id}>
-                          {p.name} (wins: {p.wins})
-                        </div>
-                      ))}
-                    </button>
-                  )}
-
-                  <div className="px-2 self-center">VS</div>
-
-                  {/* EQUIPE B */}
-                  {matchmakingValidated ? (
-                    /*Affichage du bouton pour saisir les gagnants*/
-                    <button
-                      onClick={() => {
-                        if (m.winner === "B") {
-                          undoMatchResult(m); // annule si on reclique sur le gagnant
-                        } else if (!m.winner) {
-                          recordMatchResult(m, "B"); // enregistre si pas encore de gagnant
-                        }
-                      }}
-                      className={`px-3 py-1 rounded ${
-                        m.winner === "B"
-                          ? "bg-green-500 text-white"
-                          : "bg-pink-600 text-white hover:bg-green-500"
-                      } ${
-                        m.winner && m.winner !== "B"
-                          ? "opacity-60 cursor-not-allowed"
-                          : "cursor-pointer"
-                      }`}
-                    >
-                      {m.teamB.map((p) => (
-                        <div key={p.id}>
-                          {p.name} (wins: {p.wins})
-                        </div>
-                      ))}
-                      {m.winner === null
-                        ? ""
-                        : m.winner === "B"
-                        ? "Victoire"
-                        : " Défaite"}
-                    </button>
-                  ) : (
-                    /*Affichage du texte, on met les boutons que si c'est validé*/
-                    <button
-                      disabled
-                      className="px-3 py-1 bg-pink-600 text-white rounded"
-                    >
-                      {m.teamB.map((p) => (
-                        <div key={p.id}>
-                          {p.name} (wins: {p.wins})
-                        </div>
-                      ))}
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* TABLEAU */}
-        <div className="overflow-x-auto overflow-y-auto max-h-[80vh] relative scrollbar-thick scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-          <table className="mt-3 table-auto border-collapse border w-full min-w-[900px]">
-            <thead className="bg-gray-100 border-2 border-black sticky top-0 z-30">
-              <tr>
-                {/* Colonne prénom fixe */}
-                <th className="border px-2 py-1 sticky left-0 bg-white z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.2)]">
-                  Prénom
-                </th>
-                <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
-                  Victoires
-                </th>
 
-                {admin && (
-                  <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
-                    Actions
-                  </th>
-                )}
-
-                {/* Colonnes rounds inversées */}
-                {Array.from(
-                  {
-                    length: Math.max(
-                      ...players.map((p) => p.roundHistory?.length || 0)
-                    ),
-                  },
-                  (_, i) => {
-                    const roundIndex =
-                      Math.max(
-                        ...players.map((p) => p.roundHistory?.length || 0)
-                      ) -
-                      1 -
-                      i;
-                    return (
-                      <th
-                        key={i}
-                        className={`border border-black px-2 py-1 text-center sticky top-0 z-20 
-                      }`}
-                      >
-                        Round {roundIndex + 1}
-                      </th>
-                    );
-                  }
-                )}
-
-                <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
-                  Nb Repos
-                </th>
-                <th className="border px-2 py-1 sticky top-0 bg-gray-100 z-20">
-                  Partenaires précédents
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {sortedPlayersByWins.map((player) => (
-                <tr key={player.id} className="hover:bg-gray-50">
-                  {/* Prénom fixe */}
-                  <td className="border px-2 py-1 sticky left-0 bg-white z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.2)]">
-                    {admin && editingPlayerId === player.id ? (
-                      <input
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                      />
-                    ) : (
-                      player.name
-                    )}
-                  </td>
-
-                  <td className="border px-2 py-1 text-center">
-                    {player.wins}
-                  </td>
-
-                  {admin && (
-                    <td className="border px-2 py-1 text-center">
-                      {editingPlayerId === player.id ? (
-                        <button
-                          className="text-green-600"
-                          onClick={() => confirmEdit(player.id)}
-                        >
-                          OK
-                        </button>
-                      ) : (
-                        <>
-                          <button
-                            className="text-blue-600 mr-2"
-                            onClick={() => startEdit(player)}
-                          >
-                            Modifier
-                          </button>
-                          <button
-                            className="text-red-600"
-                            onClick={() => deletePlayer(player.id)}
-                          >
-                            Supprimer
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  )}
-
-                  {/* Colonnes rounds */}
-                  {Array.from(
-                    {
-                      length: Math.max(
-                        ...players.map((p) => p.roundHistory?.length || 0)
-                      ),
-                    },
-                    (_, i) => {
-                      const roundIndex =
-                        Math.max(
-                          ...players.map((p) => p.roundHistory?.length || 0)
-                        ) -
-                        1 -
-                        i;
-                      const round = player.roundHistory?.[roundIndex];
-
-                      const baseColor =
-                        i % 2 === 0 ? "bg-gray-50" : "bg-gray-200";
-
-                      if (!round) {
-                        return (
-                          <td
-                            key={i}
-                            className={`border px-2 py-1 text-center text-gray-300`}
-                          >
-                            –
-                          </td>
-                        );
-                      }
-
-                      if (round.result === "rest") {
-                        return (
-                          <td
-                            key={i}
-                            className={`border px-2 py-1 text-center italic text-gray-500`}
-                          >
-                            Repos 💤
-                          </td>
-                        );
-                      }
-
-                      const opponentsNames = (round.opponents || []).join(
-                        " & "
-                      );
-
-                      return (
-                        <td
-                          key={i}
-                          className={`border px-2 py-1 text-center whitespace-nowrap ${
-                            round.won ? "bg-green-100" : "bg-red-100"
-                          }`}
-                        >
-                          <div className="flex flex-row items-center gap-1 whitespace-nowrap">
-                            <span className="text-gray-600">
-                              Terrain {round.terrain ?? "?"}
-                            </span>
-                            <span className="text-blue-700">
-                              👥 {round.partner}
-                            </span>
-                            <span className="text-red-700">
-                              ⚔️ {opponentsNames || "?"}
-                            </span>
-                            <span className="font-semibold text-gray-700 text-xl ml-auto">
-                              {round.won ? "🏆" : "☠️"}
-                            </span>
-                          </div>
-                        </td>
-                      );
-                    }
-                  )}
-                  {/* Colonne Nb repos */}
-                  <td className="border px-2 py-1 text-center">
-                    {player.restCount || 0}
-                  </td>
-
-                  {/* Colonne partenaires précédents */}
-                  <td className="border px-2 py-1 text-center whitespace-nowrap">
-                    {[...player.pastPartners]
-                      .map((partnerId) => {
-                        const name = getName(players, partnerId);
-                        const count = player.partnersHistory?.[partnerId] || 1;
-                        return count > 1 ? `${name} (x${count})` : name;
-                      })
-                      .join(" ; ")}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <button
+          className="ml-4 px-4 py-2 bg-slate-700 text-white rounded text-lg"
+          onClick={() => setShowTableauStats((v) => !v)}
+        >
+          📊 Tableau statistiques
+        </button>
+        {showTableauStats && (
+          <TableauStatsJoueurs
+            players={players}
+            sortedPlayersByWins={sortedPlayersByWins}
+            admin={admin}
+            editingPlayerId={editingPlayerId}
+            editName={editName}
+            setEditName={setEditName}
+            startEdit={startEdit}
+            confirmEdit={confirmEdit}
+            deletePlayer={deletePlayer}
+          />
+        )}
       </div>
 
       {/* FENETRES SUPPLEMENTAIRES */}
