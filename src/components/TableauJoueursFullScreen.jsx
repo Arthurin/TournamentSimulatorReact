@@ -5,6 +5,8 @@ export default function TableauJoueursFullScreen({
   matchResults,
   onClose,
 }) {
+  const [zoom, setZoom] = useState(1);
+
   const [viewport, setViewport] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -65,10 +67,18 @@ export default function TableauJoueursFullScreen({
 
   const availableHeight = viewport.height;
 
+  function zoomUp() {
+    setZoom(zoom + 0.1);
+  }
+
+  function zoomDown() {
+    setZoom(zoom - 0.1);
+  }
+
   /* 🔴 CAS LIMITE : écran trop petit */
   if (availableHeight < MIN_AVAILABLE_HEIGHT) {
     return (
-      <div className="fixed inset-0 z-50 bg-neutral-900 text-black flex flex-col items-center justify-center">
+      <div className="fixed inset-0 z-50 bg-white text-black flex flex-col items-center justify-center">
         <div className="text-2xl font-bold mb-6 text-center">
           Fenêtre trop petite
         </div>
@@ -134,93 +144,71 @@ export default function TableauJoueursFullScreen({
   return (
     <div className="fixed inset-0 z-50 bg-white text-black">
       {/* HEADER */}
-      <div className="absolute top-4 right-4 z-10">
+      <div className="top-4 right-4 z-10 flex flex-col menuContainer">
         <button
           onClick={onClose}
           className="px-6 py-3 bg-red-300 rounded-xl text-xl hover:bg-red-700"
         >
           Retour
         </button>
+        {""}
+        <button
+          onClick={zoomUp}
+          className="px-6 py-3 bg-neutral-300 rounded-xl text-xl hover:bg-neutral-700"
+        >
+          Zoom +
+        </button>
+        {""}
+        <button
+          onClick={zoomDown}
+          className="px-6 py-3 bg-neutral-300 rounded-xl text-xl hover:bg-neutral-700"
+        >
+          Zoom -
+        </button>
       </div>
 
       {/* CONTENU */}
-      <div className="flex px-6 gap-6" style={{ height: availableHeight }}>
-        {columns.map((col, colIndex) => (
-          <div
-            key={colIndex}
-            className="flex-none flex flex-col content-start basis-0 justify-start grow-0 flex-nowrap"
-          >
-            {col.map((player) => {
-              const status = statusById.get(player.id);
+      <div className="listeJoueursFullScreen" style={{ zoom: zoom }}>
+        {columns.map((col, colIndex) =>
+          col.map((player) => {
+            const status = statusById.get(player.id);
 
-              return (
-                <div
-                  key={player.id}
-                  className="bg-neutral-100 rounded-xl margeVerticale border-2 border-b-black px-6 flex items-center"
-                  style={{
-                    height: availableHeight / rowsPerColumn,
-                    fontSize,
-                  }}
-                >
-                  <div
-                    className="grid items-center gap-x-6 w-full"
-                    style={{
-                      gridTemplateColumns: `${columnNameWidths[colIndex]}px 1fr`,
-                    }}
-                  >
+            return (
+              <div
+                key={player.id}
+                className="bg-neutral-100 rounded-xl border-2 border-b-black itemJoueurFullScreen flex"
+              >
+                <div className="items-center w-full">
+                  <div className="flex items-center">
                     {/* PRÉNOM */}
-                    <div
-                      className="font-extrabold"
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "visible",
-                        textOverflow: "unset",
-                      }}
-                    >
-                      {player.name}
-                    </div>
+                    <div className="font-extrabold">{player.name}</div>
 
-                    {/* STATUT */}
-                    <div
-                      className="flex items-center gap-4"
-                      style={{
-                        whiteSpace: "nowrap",
-                        overflow: "visible",
-                      }}
-                    >
-                      {status?.type === "rest" && (
-                        <span className="italic text-black">Repos 💤</span>
-                      )}
-
-                      {status?.type === "play" && (
-                        <>
-                          <span
-                            className="text-black flex items-center gap-1"
-                            style={{
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            🏸 {status.terrain}
-                          </span>
-
-                          <span
-                            className="text-green-700 font-semibold"
-                            style={{
-                              whiteSpace: "nowrap",
-                              overflow: "visible",
-                            }}
-                          >
-                            {status.partner}
-                          </span>
-                        </>
-                      )}
-                    </div>
+                    {status?.type === "play" && (
+                      <>
+                        <span className="fieldIcon">🏸</span>
+                        <span className="text-black flex items-center gap-1">
+                          {status.terrain}
+                        </span>
+                      </>
+                    )}
                   </div>
+
+                  {/* STATUT */}
+
+                  {status?.type === "rest" && (
+                    <span className="italic text-black">Repos 💤</span>
+                  )}
+
+                  {status?.type === "play" && (
+                    <span className="text-green-700 font-semibold">
+                      {status.partner}
+                    </span>
+                  )}
                 </div>
-              );
-            })}
-          </div>
-        ))}
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

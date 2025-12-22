@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+body {
+  margin: 0;
+}
+
 /* styles/globals.css ou component CSS */
 .scrollbar-thick {
   overflow: auto;
@@ -23,4 +27,35 @@
 
 .margeVerticale {
   margin: 6px 0;
+}
+
+.listeJoueursFullScreen {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-content: stretch;
+  gap: 7px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+  zoom: 100%;
+}
+
+.itemJoueurFullScreen {
+  flex-grow: 1;
+  width: auto;
+  font-size: xxx-large;
+  padding: 0 6px;
+}
+
+.fieldIcon {
+  margin-left: -10px;
+  margin-right: -13px;
+  padding: 0;
+}
+
+.menuContainer {
+  max-width: fit-content;
 }

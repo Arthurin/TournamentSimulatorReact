@@ -16,8 +16,11 @@ Testable ici : https://arthurin.github.io/TournamentSimulatorReact/
 
 Idées d'amélioration :
 
+- Scénario de navigation cohérent : Accueil - En place - Saisir les résultats
+- Ajout de joueurs séparés par un retour à la ligne plutôt qu'un ;
 - Sauvegarder dans le navigateur les données pour ne pas tout perdre en cas de rafraichissement de la page
-- Permettre de mettre un joueur sur la touche et de le rajouter ensuite ?
+- Permettre de mettre un joueur sur la touche depuis la page Accueil et de le rajouter ensuite.
+- Dans la saisie des résultats permettre de donner un point à un joueur au repos (comme ça 2 personnes au repos peuvent faire un match simple)
 
 Commande de dev :
 Pour publier sur github : npm run deploy
