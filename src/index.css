@@ -97,3 +97,11 @@ body {
   font-size: 2.5rem;
   vertical-align: bottom;
 }
+
+.blocInfosSecondaires {
+  height: auto;
+}
+
+.blocInfosPrincipales {
+  margin-bottom: -25px;
+}

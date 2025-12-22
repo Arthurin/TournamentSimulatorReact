@@ -141,40 +141,41 @@ export default function TableauJoueursFullScreen({
           return (
             <div
               key={player.id}
-              className="bg-neutral-200 rounded-xl border-2 border-b-black itemJoueurFullScreen flex"
+              className="bg-neutral-200 rounded-xl border-2 border-b-black itemJoueurFullScreen"
             >
-              <div className="items-center w-full">
-                <div className="flex items-center justify-between">
-                  {/* PRÉNOM */}
-                  <div className="font-bold">{player.name}</div>
-
-                  {status?.type === "play" && (
-                    <div className="flex">
-                      <span className="fieldIcon">🏸</span>
-                      <span className="text-black flex items-center gap-1">
-                        {status.terrain}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* STATUT */}
-
-                {status?.type === "rest" && (
-                  <span className="italic text-black sizeListeJoueursInfosSecondaires">
-                    💤Repos
-                  </span>
-                )}
+              <div className="flex items-center justify-between blocInfosPrincipales">
+                {/* PRÉNOM */}
+                <div className="font-bold">{player.name}</div>
 
                 {status?.type === "play" && (
-                  <div>
-                    <span className="partenaireIcon">👥</span>
-                    <span className="text-blue-700 font-semibold sizeListeJoueursInfosSecondaires">
-                      {status.partner}
+                  <div className="flex">
+                    <span className="fieldIcon">🏸</span>
+                    <span className="text-black flex items-center gap-1">
+                      {status.terrain}
                     </span>
                   </div>
                 )}
               </div>
+
+              {/* STATUT */}
+
+              {status?.type === "rest" && (
+                <div className="blocInfosSecondaires">
+                  <span className="partenaireIcon">💤</span>
+                  <span className="text-black italic sizeListeJoueursInfosSecondaires">
+                    Repos
+                  </span>
+                </div>
+              )}
+
+              {status?.type === "play" && (
+                <div className="blocInfosSecondaires">
+                  <span className="partenaireIcon">👥</span>
+                  <span className="text-blue-700 sizeListeJoueursInfosSecondaires">
+                    {status.partner}
+                  </span>
+                </div>
+              )}
             </div>
           );
         })
