@@ -30,8 +30,14 @@ Testable ici : https://arthurin.github.io/TournamentSimulatorReact/
 # Screenshots
 
 ![Page d'accueil](/docs/1.png "Page d'accueil")
+Page d'accueil
 ![Page joueurs - round 1](/docs/2.png "Page joueurs - round 1")
+Page joueurs - round 1 (utiliser le zoom pour adapter à la taille de l'écran le nom des joueurs)
 ![Page résultats - round 1](/docs/3.png "Page résultats - round 1")
+Page résultats - round 1"
 ![Page résultats - round 1 (complété)](/docs/4.png "Page résultats - round 1 (complété)")
+Page résultats - round 1 (complété)
 ![Page joueurs - round 2](/docs/2.png "Page joueurs - round 2")
+Page joueurs - round 2
 ![Page d'accueil - round 3](/docs/6.png "Page d'accueil - round 3")
+Page d'accueil - round 3
