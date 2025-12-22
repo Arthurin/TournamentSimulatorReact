@@ -224,77 +224,9 @@ export default function BadmintonMatchmaker() {
   let homePage = (
     <div>
       {/* HEADER */}
-      {/* BOUTON SECRET POUR ADMIN */}
-      <button
-        className="absolute top-0 right-0 w-10 h-10 bg-transparent cursor-pointer"
-        onClick={() => setAdmin((a) => !a)}
-      />
 
-      {/* AFFICHAGE DU ROUND + ACTIONS + DONNER LES RESULTATS */}
+      {/* AJOUTER DES PARTICIPANT.E.S + TABLEAU RECAP DES RESULTATS */}
       <div className="">
-        {/* AFFICHAGE ETAT DU ROUND */}
-        <div className="flex mb-3 text-xl align-baseline">
-          {matchmakingGenerated && (
-            <>
-              {matchResults.matches.every((m) => m.winner !== null) ? (
-                // Round Terminé //
-                <div className="text-black">Round terminé</div>
-              ) : matchmakingValidated ? (
-                <div className="text-emerald-700">Round en cours</div>
-              ) : (
-                // Validation du matchmaking
-                // Disparait une fois que le matchmaking est validé
-                <>
-                  <div className="text-amber-500">
-                    Round généré, en attente de validation
-                  </div>
-                </>
-              )}
-            </>
-          )}
-        </div>
-        {/* AFFICHAGE ACTIONS DU ROUND */}
-        <div className="flex align-baseline items-start">
-          <div className="mt-2 px-3 ps-0 py-2 font-bold">
-            Actions disponibles :{" "}
-          </div>
-          {
-            /* BOUTON Générer le prochain round : uniquement quand des équipes ont été générés et que le round actuel est terminé ! */
-            matchResults.matches.length !== 0 &&
-            matchResults.matches.every((m) => m.winner !== null) ? (
-              <button
-                className="cursor-pointer mt-2 px-3 py-2 bg-amber-500 text-white rounded opacity-100"
-                onClick={() => {
-                  endRoundAndStartNext();
-                }}
-              >
-                Générer le round {roundCount + 1}
-              </button>
-            ) : matchmakingValidated ? (
-              <div className="mt-2 px-3 py-2 ps-0">
-                Clique sur les gagnant·e·s pour noter le score
-              </div>
-            ) : (
-              matchResults.matches.length !== 0 && (
-                <>
-                  <button
-                    className={`mt-2 px-3 py-2 ml-3 bg-green-600 rounded ${
-                      matchmakingValidated
-                        ? "opacity-60 text-white cursor-not-allowed"
-                        : "opacity-100 text-white cursor-pointer"
-                    }`}
-                    disabled={matchmakingValidated}
-                    onClick={() => {
-                      setMatchmakingValidated(true);
-                    }}
-                  >
-                    Valider et commencer les matchs
-                  </button>
-                </>
-              )
-            )
-          }
-        </div>
         {/* AJOUTER DES PARTICIPANT.E.S */}
         <div className="w-full flex items-baseline">
           <h3 className="font-bold mr-5">Ajouter des participant·e·s : </h3>
@@ -330,7 +262,7 @@ ${
           </div>
 
           <button
-            className="mt-4 px-3 py-2 bg-orange-600 text-white rounded opacity-100 cursor-pointer"
+            className="px-3 py-2 bg-orange-600 text-white rounded opacity-100 cursor-pointer"
             onClick={() => {
               runMatchmaking(players);
               setMatchmakingGenerated(true);
@@ -342,6 +274,14 @@ ${
             {matchResults.matches.length !== 0
               ? "Regénérer le round (en cas d'ajout de joueur·euse·s)"
               : "Générer le round"}
+          </button>
+
+          {/* BOUTON POUR ADMIN */}
+          <button
+            className="admin cursor-pointer px-3 py-2 bg-red-700 text-white ounded"
+            onClick={() => setAdmin((a) => !a)}
+          >
+            Admin
           </button>
         </div>
         {/* TABLEAU */}
@@ -535,11 +475,41 @@ ${
           Résultats
         </button>
 
+        {/* AFFICHAGE ETAT DU ROUND */}
+        <div className="flex mt-10 flex-col text-l text-center">
+          <p>-</p>
+          <p className="font-bold">État du round :</p>
+          {matchmakingGenerated ? (
+            <>
+              {matchResults.matches.every((m) => m.winner !== null) ? (
+                // Round Terminé //
+                <div className="text-red-700">
+                  <div>Round terminé</div>
+                  <button
+                    className="cursor-pointer mt-2 px-3 py-2 bg-red-700 text-white rounded opacity-100"
+                    onClick={() => {
+                      endRoundAndStartNext();
+                    }}
+                  >
+                    Sauvegarder
+                  </button>
+                </div>
+              ) : matchmakingValidated ? (
+                <div className="text-emerald-700">Round en cours</div>
+              ) : (
+                ""
+              )}
+            </>
+          ) : (
+            <p>Tournois en attente de lancement</p>
+          )}
+        </div>
+
         {showPage == "players" && (
           <>
             <button
               onClick={zoomUp}
-              className="cursor-pointer mt-30 mb-2 border px-4 py-3 bg-neutral-600 rounded-xl text-l text-white hover:bg-neutral-400"
+              className="cursor-pointer mt-5 mb-2 border px-4 py-3 bg-neutral-600 rounded-xl text-l text-white hover:bg-neutral-400"
             >
               Zoom +
             </button>

@@ -82,3 +82,8 @@ body {
   overflow-x: auto;
   zoom: 100%;
 }
+
+.admin {
+  margin-top: auto;
+  margin-left: auto;
+}
