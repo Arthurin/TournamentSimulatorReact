@@ -6,7 +6,7 @@ export default function FullScreenMatches({
   onClose,
 }) {
   return (
-    <div className="fixed inset-0 z-50 bg-neutral-900 text-white p-6 flex flex-col">
+    <div className="matchesContainer">
       {/* REPOS */}
       <div className="mb-6">
         <h2 className="text-2xl font-bold mb-2">Au repos</h2>
@@ -14,30 +14,24 @@ export default function FullScreenMatches({
           {matchResults.resting.map((p) => (
             <div
               key={p.id}
-              className="px-4 py-2 bg-neutral-700 rounded text-2xl font-semibold"
+              className="px-4 py-2 bg-neutral-200 rounded text-2xl font-semibold"
             >
               {p.name}
             </div>
           ))}
         </div>
-        <button
-          onClick={onClose}
-          className="text-xl px-4 py-2 bg-red-600 rounded hover:bg-red-700 fixed top-4 right-4"
-        >
-          Retour
-        </button>
       </div>
 
       {/* MATCHES */}
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-auto">
+      <div className="fieldContainer">
         {matchResults.matches.map((m, i) => (
           <div
             key={i}
-            className="bg-neutral-800 rounded-xl p-6 flex flex-col justify-between"
+            className="bg-neutral-200 rounded-xl p-6 flex flex-col justify-between"
           >
             {/* TERRAIN */}
             <div className="text-center mb-4">
-              <div className="text-3xl font-extrabold uppercase tracking-widest">
+              <div className="text-3xl h-fit font-extrabold uppercase tracking-widest">
                 Terrain {i + 1}
               </div>
             </div>

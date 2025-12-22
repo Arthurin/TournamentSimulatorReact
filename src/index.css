@@ -31,13 +31,11 @@ body {
 
 .listeJoueursFullScreen {
   display: flex;
-  flex-direction: column;
   flex-wrap: wrap;
   justify-content: space-between;
   align-content: stretch;
-  gap: 7px;
+  gap: 20px;
   width: 100%;
-  height: 100%;
   box-sizing: border-box;
   overflow-x: auto;
   zoom: 100%;
@@ -58,4 +56,29 @@ body {
 
 .menuContainer {
   max-width: fit-content;
+  background-color: #d8ecf3;
+  min-height: 100vh;
+  height: auto;
+  padding: 8px;
+}
+
+.pageContainer {
+  width: -webkit-fill-available;
+}
+
+.matchesContainer {
+  width: auto;
+  height: auto;
+}
+
+.fieldContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-content: stretch;
+  gap: 6px;
+  width: fit-content;
+  box-sizing: border-box;
+  overflow-x: auto;
+  zoom: 100%;
 }

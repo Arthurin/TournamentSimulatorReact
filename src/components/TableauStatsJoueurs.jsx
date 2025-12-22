@@ -16,7 +16,7 @@ export default function TableauStatsJoueurs({
   deletePlayer,
 }) {
   return (
-    <div className="overflow-x-auto overflow-y-auto max-h-[80vh] relative scrollbar-thick scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+    <div className="overflow-x-auto relative scrollbar-thick scrollbar-thumb-gray-400 scrollbar-track-gray-200">
       <table className="mt-3 table-auto border-collapse border w-full min-w-[900px]">
         <thead className="bg-gray-100 border-2 border-black sticky top-0 z-30">
           <tr>

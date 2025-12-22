@@ -3,10 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 export default function TableauJoueursFullScreen({
   players,
   matchResults,
+  zoom,
   onClose,
 }) {
-  const [zoom, setZoom] = useState(1);
-
   const [viewport, setViewport] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -66,14 +65,6 @@ export default function TableauJoueursFullScreen({
   const MIN_FONT = 18;
 
   const availableHeight = viewport.height;
-
-  function zoomUp() {
-    setZoom(zoom + 0.1);
-  }
-
-  function zoomDown() {
-    setZoom(zoom - 0.1);
-  }
 
   /* 🔴 CAS LIMITE : écran trop petit */
   if (availableHeight < MIN_AVAILABLE_HEIGHT) {
@@ -142,74 +133,47 @@ export default function TableauJoueursFullScreen({
   );
 
   return (
-    <div className="fixed inset-0 z-50 bg-white text-black">
-      {/* HEADER */}
-      <div className="top-4 right-4 z-10 flex flex-col menuContainer">
-        <button
-          onClick={onClose}
-          className="px-6 py-3 bg-red-300 rounded-xl text-xl hover:bg-red-700"
-        >
-          Retour
-        </button>
-        {""}
-        <button
-          onClick={zoomUp}
-          className="px-6 py-3 bg-neutral-300 rounded-xl text-xl hover:bg-neutral-700"
-        >
-          Zoom +
-        </button>
-        {""}
-        <button
-          onClick={zoomDown}
-          className="px-6 py-3 bg-neutral-300 rounded-xl text-xl hover:bg-neutral-700"
-        >
-          Zoom -
-        </button>
-      </div>
+    <div className="listeJoueursFullScreen" style={{ zoom: zoom }}>
+      {columns.map((col, colIndex) =>
+        col.map((player) => {
+          const status = statusById.get(player.id);
 
-      {/* CONTENU */}
-      <div className="listeJoueursFullScreen" style={{ zoom: zoom }}>
-        {columns.map((col, colIndex) =>
-          col.map((player) => {
-            const status = statusById.get(player.id);
-
-            return (
-              <div
-                key={player.id}
-                className="bg-neutral-100 rounded-xl border-2 border-b-black itemJoueurFullScreen flex"
-              >
-                <div className="items-center w-full">
-                  <div className="flex items-center">
-                    {/* PRÉNOM */}
-                    <div className="font-extrabold">{player.name}</div>
-
-                    {status?.type === "play" && (
-                      <>
-                        <span className="fieldIcon">🏸</span>
-                        <span className="text-black flex items-center gap-1">
-                          {status.terrain}
-                        </span>
-                      </>
-                    )}
-                  </div>
-
-                  {/* STATUT */}
-
-                  {status?.type === "rest" && (
-                    <span className="italic text-black">Repos 💤</span>
-                  )}
+          return (
+            <div
+              key={player.id}
+              className="bg-neutral-100 rounded-xl border-2 border-b-black itemJoueurFullScreen flex"
+            >
+              <div className="items-center w-full">
+                <div className="flex items-center">
+                  {/* PRÉNOM */}
+                  <div className="font-extrabold">{player.name}</div>
 
                   {status?.type === "play" && (
-                    <span className="text-green-700 font-semibold">
-                      {status.partner}
-                    </span>
+                    <>
+                      <span className="fieldIcon">🏸</span>
+                      <span className="text-black flex items-center gap-1">
+                        {status.terrain}
+                      </span>
+                    </>
                   )}
                 </div>
+
+                {/* STATUT */}
+
+                {status?.type === "rest" && (
+                  <span className="italic text-black">Repos 💤</span>
+                )}
+
+                {status?.type === "play" && (
+                  <span className="text-green-700 font-semibold">
+                    {status.partner}
+                  </span>
+                )}
               </div>
-            );
-          })
-        )}
-      </div>
+            </div>
+          );
+        })
+      )}
     </div>
   );
 }
