@@ -100,7 +100,10 @@ export default function BadmintonMatchmaker() {
     // Générer de nouvelles équipes
     runMatchmaking(updatedPlayers);
     setMatchmakingGenerated(true);
-    setMatchmakingValidated(false);
+    setMatchmakingValidated(true);
+
+    // Changer de page pour afficher la liste des joueurs
+    setShowPage("players");
   }
 
   function runMatchmaking(currentPlayers) {
@@ -327,17 +330,14 @@ ${
           </div>
 
           <button
-            className={`mt-4 px-3 py-2 bg-orange-600 text-white rounded ${
-              matchmakingValidated
-                ? "opacity-60 cursor-not-allowed"
-                : "opacity-100 cursor-pointer"
-            }`}
+            className="mt-4 px-3 py-2 bg-orange-600 text-white rounded opacity-100 cursor-pointer"
             onClick={() => {
               runMatchmaking(players);
               setMatchmakingGenerated(true);
-              setMatchmakingValidated(false); // reset validation si on regénère
+              setMatchmakingValidated(true);
+              // Changer de page pour afficher la liste des joueurs
+              setShowPage("players");
             }}
-            disabled={matchmakingValidated}
           >
             {matchResults.matches.length !== 0
               ? "Regénérer le round (en cas d'ajout de joueur·euse·s)"
@@ -517,19 +517,19 @@ ${
           onClick={() => {
             setShowPage("home");
           }}
-          className="mb-2 border px-6 py-3 bg-indigo-600 rounded-xl text-2xl text-white hover:bg-indigo-400"
+          className="cursor-pointer mb-2 border px-6 py-3 bg-indigo-600 rounded-xl text-2xl text-white hover:bg-indigo-400"
         >
           Accueil
         </button>
 
         <button
-          className="mb-2 border px-4 py-3 bg-emerald-600 rounded-xl text-2xl text-white hover:bg-emerald-400"
+          className="cursor-pointer mb-2 border px-4 py-3 bg-emerald-600 rounded-xl text-2xl text-white hover:bg-emerald-400"
           onClick={() => setShowPage("players")}
         >
           Terrains
         </button>
         <button
-          className="mb-2 border px-4 py-3 bg-green-600 rounded-xl text-2xl text-white hover:bg-green-400"
+          className="cursor-pointer mb-2 border px-4 py-3 bg-green-600 rounded-xl text-2xl text-white hover:bg-green-400"
           onClick={() => setShowPage("results")}
         >
           Résultats
@@ -539,14 +539,14 @@ ${
           <>
             <button
               onClick={zoomUp}
-              className="mt-30 mb-2 border px-4 py-3 bg-neutral-600 rounded-xl text-l text-white hover:bg-neutral-400"
+              className="cursor-pointer mt-30 mb-2 border px-4 py-3 bg-neutral-600 rounded-xl text-l text-white hover:bg-neutral-400"
             >
               Zoom +
             </button>
 
             <button
               onClick={zoomDown}
-              className="mb-2 border px-4 py-3 bg-neutral-600 rounded-xl text-l text-white hover:bg-neutral-400"
+              className="cursor-pointer mb-2 border px-4 py-3 bg-neutral-600 rounded-xl text-l text-white hover:bg-neutral-400"
             >
               Zoom -
             </button>
