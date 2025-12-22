@@ -141,33 +141,38 @@ export default function TableauJoueursFullScreen({
           return (
             <div
               key={player.id}
-              className="bg-neutral-100 rounded-xl border-2 border-b-black itemJoueurFullScreen flex"
+              className="bg-neutral-200 rounded-xl border-2 border-b-black itemJoueurFullScreen flex"
             >
               <div className="items-center w-full">
-                <div className="flex items-center">
+                <div className="flex items-center justify-between">
                   {/* PRÉNOM */}
-                  <div className="font-extrabold">{player.name}</div>
+                  <div className="font-bold">{player.name}</div>
 
                   {status?.type === "play" && (
-                    <>
+                    <div className="flex">
                       <span className="fieldIcon">🏸</span>
                       <span className="text-black flex items-center gap-1">
                         {status.terrain}
                       </span>
-                    </>
+                    </div>
                   )}
                 </div>
 
                 {/* STATUT */}
 
                 {status?.type === "rest" && (
-                  <span className="italic text-black">Repos 💤</span>
+                  <span className="italic text-black sizeListeJoueursInfosSecondaires">
+                    💤Repos
+                  </span>
                 )}
 
                 {status?.type === "play" && (
-                  <span className="text-green-700 font-semibold">
-                    {status.partner}
-                  </span>
+                  <div>
+                    <span className="partenaireIcon">👥</span>
+                    <span className="text-blue-700 font-semibold sizeListeJoueursInfosSecondaires">
+                      {status.partner}
+                    </span>
+                  </div>
                 )}
               </div>
             </div>

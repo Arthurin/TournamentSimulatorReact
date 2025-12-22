@@ -48,8 +48,8 @@ export default function FullScreenMatches({
                 className={`rounded-xl p-6 text-3xl font-bold transition
                     ${
                       m.winner === "A"
-                        ? "bg-green-600"
-                        : "bg-blue-600 hover:bg-green-600"
+                        ? "bg-emerald-400"
+                        : "bg-blue-400 hover:bg-emerald-400"
                     }
                     ${
                       m.winner && m.winner !== "A"
@@ -76,8 +76,8 @@ export default function FullScreenMatches({
                 className={`rounded-xl p-6 text-3xl font-bold transition
                     ${
                       m.winner === "B"
-                        ? "bg-green-600"
-                        : "bg-pink-600 hover:bg-green-600"
+                        ? "bg-emerald-400"
+                        : "bg-pink-400 hover:bg-emerald-400"
                     }
                     ${
                       m.winner && m.winner !== "B"
